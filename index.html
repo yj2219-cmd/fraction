@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>말랑말랑 단위분수 탐험대</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Kids-friendly Style -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Gaegu', 'Nanum Pen Script', sans-serif;
+            background-color: #FFFDF0;
+        }
+        .fraction-line {
+            border-top: 2.5px solid #333333;
+            width: 30px;
+            margin: 2px auto;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col items-center justify-between p-2 md:p-4 selection:bg-yellow-200">
+
+    <!-- 상단 헤더 (여백 최소화) -->
+    <header class="w-full max-w-xl text-center my-1">
+        <h1 class="text-3xl md:text-4xl font-bold text-amber-600 drop-shadow-md flex items-center justify-center gap-1.5">
+            🍕 단위분수 탐험대 🍫
+        </h1>
+        <p class="text-lg md:text-xl text-amber-800 leading-tight">분자가 1인 분수의 크기를 그림으로 쉽게 비교해봐요!</p>
+    </header>
+
+    <!-- 메인 컨텐츠 영역 (h-0/flex-1 구조로 내부 스크롤 완벽 차단) -->
+    <main class="w-full max-w-xl bg-white rounded-2xl shadow-lg border-4 border-amber-300 p-3 md:p-4 flex-1 flex flex-col justify-between overflow-hidden my-1">
+        
+        <!-- 상단 모드 탭 조절 (컴팩트 크기) -->
+        <div class="flex justify-center gap-3 mb-2">
+            <button id="btn-tab-game" onclick="switchTab('game')" class="px-5 py-1.5 rounded-full text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-400 text-white border-2 border-amber-500">
+                🎯 부등호 게임
+            </button>
+            <button id="btn-tab-sandbox" onclick="switchTab('sandbox')" class="px-5 py-1.5 rounded-full text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-100 text-amber-800 border-2 border-amber-200">
+                🔍 자유롭게 보기
+            </button>
+        </div>
+
+        <!-- 시각화 스타일 토글 (원형 / 막대형) -->
+        <div class="flex justify-center items-center gap-2 mb-2 bg-amber-50 p-1.5 rounded-xl border border-amber-200 w-fit mx-auto text-base">
+            <span class="font-bold text-amber-900">그림 모양:</span>
+            <button onclick="setViewType('circle')" id="btn-view-circle" class="px-3 py-1 rounded-lg font-bold border-2 border-amber-400 bg-amber-400 text-white transition-all">
+                🍕 피자
+            </button>
+            <button onclick="setViewType('bar')" id="btn-view-bar" class="px-3 py-1 rounded-lg font-bold border-2 border-amber-200 bg-white text-amber-700 transition-all">
+                🍫 초콜릿
+            </button>
+        </div>
+
+        <!-- ================= [1. 게임 모드 화면] ================= -->
+        <div id="view-game" class="flex-1 flex flex-col justify-between overflow-hidden">
+            <!-- 게임 상태바 (한 줄로 간단히) -->
+            <div class="flex justify-between items-center bg-yellow-50 px-3 py-1 rounded-xl border border-yellow-200 mb-2 text-lg font-bold text-amber-800">
+                <div>맞힌 개수: <span id="game-score" class="text-xl text-red-500">0</span> / 10</div>
+                <div>남은 문제: <span id="game-round" class="text-xl text-blue-500">1</span>/10</div>
+            </div>
+
+            <!-- 분수 비교 카드 영역 (높이 제약을 고려해 aspect 비율 최적화) -->
+            <div class="grid grid-cols-11 gap-1 items-center justify-center flex-1 my-1 overflow-hidden">
+                <!-- 왼쪽 분수 카드 -->
+                <div class="col-span-5 bg-rose-50 border-2 border-rose-200 rounded-2xl p-2 md:p-3 h-full flex flex-col items-center justify-center shadow-inner">
+                    <div id="svg-container-a" class="w-24 h-24 md:w-32 md:h-32 flex items-center justify-center">
+                        <!-- SVG가 동적으로 주입됩니다 -->
+                    </div>
+                    <div class="mt-2 flex flex-col items-center justify-center text-2xl md:text-3xl font-bold text-rose-600 bg-white px-4 py-1 rounded-xl shadow-sm border border-rose-100">
+                        <div>1</div>
+                        <div class="fraction-line"></div>
+                        <div id="denom-text-a">2</div>
+                    </div>
+                </div>
+
+                <!-- 부등호 위치 (중앙) -->
+                <div class="col-span-1 flex justify-center">
+                    <div id="symbol-display" class="text-3xl md:text-4xl font-extrabold text-amber-600 bg-amber-100 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl border-2 border-amber-300">
+                        ?
+                    </div>
+                </div>
+
+                <!-- 오른쪽 분수 카드 -->
+                <div class="col-span-5 bg-sky-50 border-2 border-sky-200 rounded-2xl p-2 md:p-3 h-full flex flex-col items-center justify-center shadow-inner">
+                    <div id="svg-container-b" class="w-24 h-24 md:w-32 md:h-32 flex items-center justify-center">
+                        <!-- SVG가 동적으로 주입됩니다 -->
+                    </div>
+                    <div class="mt-2 flex flex-col items-center justify-center text-2xl md:text-3xl font-bold text-sky-600 bg-white px-4 py-1 rounded-xl shadow-sm border border-sky-100">
+                        <div>1</div>
+                        <div class="fraction-line"></div>
+                        <div id="denom-text-b">3</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 부등호 버튼 선택 영역 -->
+            <div class="mt-2 mb-1">
+                <p class="text-center text-lg md:text-xl font-bold text-amber-950 mb-1.5">어느 쪽이 더 클까요?</p>
+                <div class="flex justify-center gap-4">
+                    <button onclick="checkAnswer('gt')" class="px-8 py-2 bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 text-white rounded-xl text-3xl font-bold shadow transform transition-all active:scale-95 border-b-4 border-green-700">
+                        &gt;
+                    </button>
+                    <button onclick="checkAnswer('lt')" class="px-8 py-2 bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 text-white rounded-xl text-3xl font-bold shadow transform transition-all active:scale-95 border-b-4 border-green-700">
+                        &lt;
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= [2. 자유 탐구 모드 화면] ================= -->
+        <div id="view-sandbox" class="hidden flex-1 flex flex-col justify-between overflow-hidden">
+            <p class="text-center text-lg text-amber-900 font-bold mb-2">
+                💡 아래 슬라이더를 밀어 분모를 조절해보세요!
+            </p>
+
+            <!-- 분수 비교 카드 영역 -->
+            <div class="grid grid-cols-11 gap-1 items-center justify-center flex-1 my-1 overflow-hidden">
+                <!-- 왼쪽 분수 (핑크) -->
+                <div class="col-span-5 bg-rose-50 border-2 border-rose-200 rounded-2xl p-2 md:p-3 h-full flex flex-col items-center justify-center shadow-md">
+                    <div id="sandbox-svg-a" class="w-20 h-20 md:w-28 md:h-28 flex items-center justify-center"></div>
+                    <div class="mt-1.5 flex flex-col items-center justify-center text-xl md:text-2xl font-bold text-rose-600 bg-white px-3 py-0.5 rounded-lg shadow-sm border border-rose-100">
+                        <div>1</div>
+                        <div class="fraction-line"></div>
+                        <div id="sandbox-denom-text-a">2</div>
+                    </div>
+                    <!-- 분모 조절 슬라이더 -->
+                    <div class="w-full mt-2">
+                        <label class="block text-center text-sm text-rose-800 font-bold">분모: <span id="slider-val-a" class="text-base">2</span></label>
+                        <input type="range" id="slider-a" min="2" max="12" value="2" oninput="onSandboxChange()" class="w-full h-2 bg-rose-200 rounded-lg appearance-none cursor-pointer accent-rose-500">
+                    </div>
+                </div>
+
+                <!-- 부등호 표시 (가운데) -->
+                <div class="col-span-1 flex justify-center">
+                    <div id="sandbox-symbol" class="text-3xl md:text-4xl font-extrabold text-amber-600 bg-amber-100 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl border-2 border-amber-300">
+                        =
+                    </div>
+                </div>
+
+                <!-- 오른쪽 분수 (하늘) -->
+                <div class="col-span-5 bg-sky-50 border-2 border-sky-200 rounded-2xl p-2 md:p-3 h-full flex flex-col items-center justify-center shadow-md">
+                    <div id="sandbox-svg-b" class="w-20 h-20 md:w-28 md:h-28 flex items-center justify-center"></div>
+                    <div class="mt-1.5 flex flex-col items-center justify-center text-xl md:text-2xl font-bold text-sky-600 bg-white px-3 py-0.5 rounded-lg shadow-sm border border-sky-100">
+                        <div>1</div>
+                        <div class="fraction-line"></div>
+                        <div id="sandbox-denom-text-b">4</div>
+                    </div>
+                    <!-- 분모 조절 슬라이더 -->
+                    <div class="w-full mt-2">
+                        <label class="block text-center text-sm text-sky-800 font-bold">분모: <span id="slider-val-b" class="text-base">4</span></label>
+                        <input type="range" id="slider-b" min="2" max="12" value="4" oninput="onSandboxChange()" class="w-full h-2 bg-sky-200 rounded-lg appearance-none cursor-pointer accent-sky-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 학습 정리 문구 (글씨와 간격을 가볍게 조절) -->
+            <div id="learning-note" class="bg-amber-50 p-2 rounded-xl border-2 border-amber-200 text-center text-base md:text-lg text-amber-950 font-bold leading-relaxed shadow-sm mt-2">
+                💡 분모 숫자가 <span class="text-red-500 font-black">더 작을수록</span> 전체를 조금만 나누기 때문에 <span class="text-blue-600 font-black">한 조각의 크기가 더 큽니다!</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 모달: 피드백 창 (정답 / 오답 알림) -->
+    <div id="feedback-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 text-center border-4 border-amber-300 shadow-2xl transform scale-95 transition-transform duration-300">
+            <div id="feedback-icon" class="text-6xl mb-2">🎉</div>
+            <h2 id="feedback-title" class="text-3xl font-bold text-amber-800 mb-1">참 잘했어요!</h2>
+            <p id="feedback-message" class="text-xl text-gray-700 leading-normal mb-4">설명이 들어갑니다.</p>
+            <button onclick="closeModal()" class="w-full py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-xl text-xl font-bold shadow-md transition-all active:scale-95 border-b-4 border-amber-600">
+                다음으로 넘어가기 ➔
+            </button>
+        </div>
+    </div>
+
+    <!-- 모달: 게임 완료 창 -->
+    <div id="gameover-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 text-center border-4 border-amber-400 shadow-2xl">
+            <div class="text-6xl mb-2">🏆</div>
+            <h2 class="text-3xl font-bold text-amber-800 mb-1">대단해요! 탐험 완료!</h2>
+            <p id="gameover-message" class="text-xl text-gray-700 mb-4 leading-normal">
+                10문제 중에서 <span id="final-score" class="text-red-500 font-extrabold">0</span>문제를 맞혔어요!<br>단위분수 박사가 되었네요!
+            </p>
+            <button onclick="restartGame()" class="w-full py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xl font-bold shadow-md transition-all active:scale-95 border-b-4 border-emerald-700">
+                다시 도전하기 🔄
+            </button>
+        </div>
+    </div>
+
+    <!-- 푸터 (한 줄로 간소화) -->
+    <footer class="text-center text-amber-700 text-base my-0.5">
+        © 단위분수 크기 비교하기 게임
+    </footer>
+
+    <!-- 소리 재생용 Web Audio API 스크립트 -->
+    <script>
+        // 소리 합성 함수 (간단한 비프음)
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (!ctx) return;
+                
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    const now = ctx.currentTime;
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'wrong') {
+                    const now = ctx.currentTime;
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'finish') {
+                    const now = ctx.currentTime;
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.15); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.3); // G5
+                    osc.frequency.setValueAtTime(1046.50, now + 0.45); // C6
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+                    osc.start(now);
+                    osc.stop(now + 0.7);
+                }
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+    </script>
+
+    <!-- 게임 및 렌더링 로직 -->
+    <script>
+        // 전역 상태 변수들
+        let currentTab = 'game'; // 'game' or 'sandbox'
+        let viewType = 'circle'; // 'circle' or 'bar'
+        
+        // 게임 진행 상태
+        let currentRound = 1;
+        let score = 0;
+        let denomA = 2;
+        let denomB = 3;
+        let correctAnswer = 'gt'; // 'gt'(크다) or 'lt'(작다)
+
+        // 초기 시작 시 동작 설정
+        window.onload = function() {
+            restartGame();
+            onSandboxChange();
+        }
+
+        // 탭 변경
+        function switchTab(tab) {
+            currentTab = tab;
+            const btnGame = document.getElementById('btn-tab-game');
+            const btnSandbox = document.getElementById('btn-tab-sandbox');
+            const viewGame = document.getElementById('view-game');
+            const viewSandbox = document.getElementById('view-sandbox');
+
+            if (tab === 'game') {
+                btnGame.className = "px-5 py-1.5 rounded-full text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-400 text-white border-2 border-amber-500";
+                btnSandbox.className = "px-5 py-1.5 rounded-full text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-100 text-amber-800 border-2 border-amber-200";
+                viewGame.classList.remove('hidden');
+                viewSandbox.classList.add('hidden');
+                updateGameView();
+            } else {
+                btnGame.className = "px-5 py-1.5 rounded-full text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-100 text-amber-800 border-2 border-amber-200";
+                btnSandbox.className = "px-5 py-1.5 rounded-full text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-400 text-white border-2 border-amber-500";
+                viewGame.classList.add('hidden');
+                viewSandbox.classList.remove('hidden');
+                onSandboxChange();
+            }
+        }
+
+        // 시각화 스타일 변경 (피자 vs 초콜릿)
+        function setViewType(type) {
+            viewType = type;
+            const btnCircle = document.getElementById('btn-view-circle');
+            const btnBar = document.getElementById('btn-view-bar');
+
+            if (type === 'circle') {
+                btnCircle.className = "px-3 py-1 rounded-lg font-bold border-2 border-amber-400 bg-amber-400 text-white transition-all";
+                btnBar.className = "px-3 py-1 rounded-lg font-bold border-2 border-amber-200 bg-white text-amber-700 transition-all";
+            } else {
+                btnCircle.className = "px-3 py-1 rounded-lg font-bold border-2 border-amber-200 bg-white text-amber-700 transition-all";
+                btnBar.className = "px-3 py-1 rounded-lg font-bold border-2 border-amber-400 bg-amber-400 text-white transition-all";
+            }
+
+            if (currentTab === 'game') {
+                updateGameView();
+            } else {
+                onSandboxChange();
+            }
+        }
+
+        // SVG 생성 헬퍼 함수
+        function createFractionSVG(denominator, color) {
+            const size = 160; // 뷰포트에 맞게 크기 축소 (기존 200 -> 160)
+            const center = size / 2;
+            const radius = 65; // 반지름 최적화 (기존 80 -> 65)
+
+            let svgContent = `<svg width="100%" height="100%" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">`;
+
+            if (viewType === 'circle') {
+                // 원형 (피자 나누기)
+                svgContent += `<circle cx="${center}" cy="${center}" r="${radius}" fill="#F3F4F6" stroke="#D1D5DB" stroke-width="2.5" />`;
+
+                if (denominator === 1) {
+                    svgContent += `<circle cx="${center}" cy="${center}" r="${radius}" fill="${color}" stroke="#374151" stroke-width="2" />`;
+                } else {
+                    const angleStep = 360 / denominator;
+                    const rad = (Math.PI / 180) * (-90);
+                    const radEnd = (Math.PI / 180) * (-90 + angleStep);
+
+                    const xStart = center + radius * Math.cos(rad);
+                    const yStart = center + radius * Math.sin(rad);
+                    const xEnd = center + radius * Math.cos(radEnd);
+                    const yEnd = center + radius * Math.sin(radEnd);
+
+                    const largeArc = angleStep > 180 ? 1 : 0;
+
+                    svgContent += `
+                        <path d="M ${center} ${center} L ${xStart} ${yStart} A ${radius} ${radius} 0 ${largeArc} 1 ${xEnd} ${yEnd} Z" 
+                              fill="${color}" stroke="#374151" stroke-width="2" />
+                    `;
+                }
+
+                // 구분선 그리기
+                for (let i = 0; i < denominator; i++) {
+                    const angle = -90 + (360 / denominator) * i;
+                    const radLine = (Math.PI / 180) * angle;
+                    const xLine = center + radius * Math.cos(radLine);
+                    const yLine = center + radius * Math.sin(radLine);
+                    svgContent += `<line x1="${center}" y1="${center}" x2="${xLine}" y2="${yLine}" stroke="#9CA3AF" stroke-width="1.5" />`;
+                }
+                
+                svgContent += `<circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#4B5563" stroke-width="2.5" />`;
+
+            } else {
+                // 막대형 (초콜릿 나누기)
+                const rectWidth = 130;
+                const rectHeight = 45;
+                const xStart = (size - rectWidth) / 2;
+                const yStart = (size - rectHeight) / 2;
+
+                svgContent += `<rect x="${xStart}" y="${yStart}" width="${rectWidth}" height="${rectHeight}" rx="6" fill="#F3F4F6" stroke="#D1D5DB" stroke-width="2.5" />`;
+
+                const stepWidth = rectWidth / denominator;
+                svgContent += `<rect x="${xStart}" y="${yStart}" width="${stepWidth}" height="${rectHeight}" rx="6" fill="${color}" stroke="#374151" stroke-width="2" clip-path="url(#rect-clip)" />`;
+                
+                svgContent += `
+                    <clipPath id="rect-clip">
+                        <rect x="${xStart}" y="${yStart}" width="${rectWidth}" height="${rectHeight}" rx="6" />
+                    </clipPath>
+                `;
+
+                svgContent += `<rect x="${xStart}" y="${yStart}" width="${stepWidth}" height="${rectHeight}" fill="${color}" stroke="none" clip-path="url(#rect-clip)" />`;
+
+                for (let i = 1; i < denominator; i++) {
+                    const lineX = xStart + stepWidth * i;
+                    svgContent += `<line x1="${lineX}" y1="${yStart}" x2="${lineX}" y2="${yStart + rectHeight}" stroke="#9CA3AF" stroke-width="1.5" />`;
+                }
+
+                svgContent += `<rect x="${xStart}" y="${yStart}" width="${rectWidth}" height="${rectHeight}" rx="6" fill="none" stroke="#4B5563" stroke-width="2.5" />`;
+            }
+
+            svgContent += `</svg>`;
+            return svgContent;
+        }
+
+        // 문제 새로 만들기
+        function generateQuestion() {
+            denomA = Math.floor(Math.random() * 9) + 2;
+            do {
+                denomB = Math.floor(Math.random() * 9) + 2;
+            } while (denomA === denomB);
+
+            correctAnswer = denomA < denomB ? 'gt' : 'lt';
+            updateGameView();
+        }
+
+        // 게임 화면 업데이트
+        function updateGameView() {
+            document.getElementById('game-round').innerText = currentRound;
+            document.getElementById('game-score').innerText = score;
+
+            document.getElementById('denom-text-a').innerText = denomA;
+            document.getElementById('denom-text-b').innerText = denomB;
+
+            document.getElementById('svg-container-a').innerHTML = createFractionSVG(denomA, '#FFA1A1');
+            document.getElementById('svg-container-b').innerHTML = createFractionSVG(denomB, '#70C2FF');
+
+            document.getElementById('symbol-display').innerText = '?';
+            document.getElementById('symbol-display').className = "text-3xl md:text-4xl font-extrabold text-amber-600 bg-amber-100 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl border-2 border-amber-300";
+        }
+
+        // 사용자 정답 제출 판정
+        function checkAnswer(userChoice) {
+            const isCorrect = userChoice === correctAnswer;
+            const symDisplay = document.getElementById('symbol-display');
+
+            if (correctAnswer === 'gt') {
+                symDisplay.innerText = '>';
+            } else {
+                symDisplay.innerText = '<';
+            }
+
+            const titleEl = document.getElementById('feedback-title');
+            const msgEl = document.getElementById('feedback-message');
+            const iconEl = document.getElementById('feedback-icon');
+
+            if (isCorrect) {
+                score++;
+                playSound('correct');
+                iconEl.innerText = '🎉';
+                titleEl.className = "text-3xl font-bold text-emerald-600 mb-1";
+                titleEl.innerText = "정답이에요! 참 잘했어요!";
+                symDisplay.classList.add('bg-green-100', 'border-green-400', 'text-green-600');
+            } else {
+                playSound('wrong');
+                iconEl.innerText = '💡';
+                titleEl.className = "text-3xl font-bold text-red-500 mb-1";
+                titleEl.innerText = "아쉬워요! 함께 확인해봐요";
+                symDisplay.classList.add('bg-red-100', 'border-red-400', 'text-red-500');
+            }
+
+            const largerDenom = Math.max(denomA, denomB);
+            const smallerDenom = Math.min(denomA, denomB);
+            msgEl.innerHTML = `
+                <span class="text-rose-600 font-bold">1/${denomA}</span>와 
+                <span class="text-sky-600 font-bold">1/${denomB}</span>을 비교했어요!<br>
+                분모 <span class="font-bold text-blue-600">${smallerDenom}</span>은 분모 <span class="font-bold text-red-500">${largerDenom}</span>보다 작으므로,<br>
+                <span class="font-extrabold text-amber-800 bg-amber-50 px-1 py-0.5 rounded">더 적은 조각으로 나눈 1/${smallerDenom} 조각이 더 큽니다!</span>
+            `;
+
+            document.getElementById('feedback-modal').classList.remove('hidden');
+        }
+
+        // 설명창 닫고 다음 진행
+        function closeModal() {
+            document.getElementById('feedback-modal').classList.add('hidden');
+            
+            if (currentRound >= 10) {
+                playSound('finish');
+                document.getElementById('final-score').innerText = score;
+                
+                let evaluation = "훌륭해요! 단위분수를 아주 잘 이해하고 있군요! 👍";
+                if (score <= 5) {
+                    evaluation = "자유 탐구 모드에서 크기를 조절해 가며 복습해볼까요? 😃";
+                } else if (score <= 8) {
+                    evaluation = "아주 뛰어난 실력이에요! 한 문제만 더 맞혀봐요! 🌟";
+                }
+                document.getElementById('gameover-message').innerHTML = `
+                    10문제 중에서 <span class="text-red-500 font-extrabold text-2xl">${score}</span>문제를 맞혔어요!<br>
+                    <span class="text-base font-bold text-amber-800 mt-2 block">${evaluation}</span>
+                `;
+                document.getElementById('gameover-modal').classList.remove('hidden');
+            } else {
+                currentRound++;
+                generateQuestion();
+            }
+        }
+
+        // 다시 도전하기
+        function restartGame() {
+            document.getElementById('gameover-modal').classList.add('hidden');
+            currentRound = 1;
+            score = 0;
+            generateQuestion();
+        }
+
+        // 자유 탐구 모드 조절 이벤트
+        function onSandboxChange() {
+            const valA = parseInt(document.getElementById('slider-a').value);
+            const valB = parseInt(document.getElementById('slider-b').value);
+
+            document.getElementById('slider-val-a').innerText = valA;
+            document.getElementById('slider-val-b').innerText = valB;
+            document.getElementById('sandbox-denom-text-a').innerText = valA;
+            document.getElementById('sandbox-denom-text-b').innerText = valB;
+
+            document.getElementById('sandbox-svg-a').innerHTML = createFractionSVG(valA, '#FFA1A1');
+            document.getElementById('sandbox-svg-b').innerHTML = createFractionSVG(valB, '#70C2FF');
+
+            const symbolEl = document.getElementById('sandbox-symbol');
+            const noteEl = document.getElementById('learning-note');
+
+            if (valA < valB) {
+                symbolEl.innerText = '>';
+                symbolEl.className = "text-3xl md:text-4xl font-extrabold text-rose-500 bg-rose-100 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl border-2 border-rose-300";
+                noteEl.innerHTML = `
+                    💡 분모 <span class="text-rose-600 font-extrabold">${valA}</span>이 분모 <span class="text-sky-600 font-extrabold">${valB}</span>보다 작으므로,<br>
+                    더 크게 등분된 
+                    <span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded font-black text-xl">1/${valA}이(가) 더 큽니다!</span>
+                `;
+            } else if (valA > valB) {
+                symbolEl.innerText = '<';
+                symbolEl.className = "text-3xl md:text-4xl font-extrabold text-sky-500 bg-sky-100 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl border-2 border-sky-300";
+                noteEl.innerHTML = `
+                    💡 분모 <span class="text-sky-600 font-extrabold">${valB}</span>이 분모 <span class="text-rose-600 font-extrabold">${valA}</span>보다 작으므로,<br>
+                    더 크게 등분된 
+                    <span class="bg-sky-100 text-sky-700 px-2 py-0.5 rounded font-black text-xl">1/${valB}이(가) 더 큽니다!</span>
+                `;
+            } else {
+                symbolEl.innerText = '=';
+                symbolEl.className = "text-3xl md:text-4xl font-extrabold text-amber-600 bg-amber-100 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl border-2 border-amber-300";
+                noteEl.innerHTML = `
+                    💡 분모 <span class="text-amber-800 font-extrabold">${valA}</span>(으)로 서로 같습니다!<br>
+                    <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-black text-xl">나눈 조각의 크기가 완전히 같습니다!</span>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
