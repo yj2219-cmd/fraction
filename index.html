@@ -2,91 +2,107 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>말랑말랑 단위분수 탐험대</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for Kids-friendly Style -->
+    <!-- Google Fonts: 'Jua' for excellent legibility and kids-friendly looks -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    
     <style>
         body {
-            font-family: 'Gaegu', 'Nanum Pen Script', sans-serif;
+            font-family: 'Jua', sans-serif;
             background-color: #FFFDF0;
             user-select: none;
             -webkit-user-select: none;
         }
         .fraction-line {
-            border-top: 3px solid #333333;
-            width: 35px;
+            border-top: 4px solid #374151;
+            width: 32px;
             margin: 2px auto;
         }
-        /* 포커스 안내 흔들림 및 펄스 효과 */
         .glowing-box-rose {
-            animation: pulse-border-rose 1.5s infinite;
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.2);
         }
         .glowing-box-sky {
-            animation: pulse-border-sky 1.5s infinite;
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.2);
         }
-        @keyframes pulse-border-rose {
-            0%, 100% { border-color: #f43f5e; box-shadow: 0 0 0 0px rgba(244, 63, 94, 0.4); }
-            50% { border-color: #fda4af; box-shadow: 0 0 0 6px rgba(244, 63, 94, 0.2); }
-        }
-        @keyframes pulse-border-sky {
-            0%, 100% { border-color: #0ea5e9; box-shadow: 0 0 0 0px rgba(14, 165, 233, 0.4); }
-            50% { border-color: #7dd3fc; box-shadow: 0 0 0 6px rgba(14, 165, 233, 0.2); }
-        }
-        /* 스크롤바 숨기기 (가로 숫자 패널용) */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        
+        /* 세로 높이가 낮은 기기 (태블릿 가로, 모바일 가로 등) 대책 */
+        @media (max-height: 720px) {
+            header h1 { font-size: 1.5rem !important; }
+            main { padding: 0.75rem !important; }
+            #game-guide-text { font-size: 0.9rem !important; padding: 2px !important; margin-bottom: 4px !important; }
+            
+            /* 가로 화면에서도 보기 편하도록 최소 영역 확보 후 스크롤 지원 */
+            #layout-single-card { min-height: 180px !important; padding: 0.5rem !important; }
+            #single-svg-container { width: 120px !important; height: 120px !important; }
+            #single-fraction-box { font-size: 1.5rem !important; padding: 2px 1.5rem !important; }
+            .fraction-line { border-top-width: 3px !important; width: 20px !important; margin: 1px auto !important; }
+            
+            #layout-double-card { min-height: 160px !important; }
+            #card-left, #card-right { padding: 0.4rem !important; }
+            #svg-container-a, #svg-container-b { width: 100px !important; height: 100px !important; }
+            #card-left .glowing-box-rose, #card-right .glowing-box-sky { font-size: 1.3rem !important; padding: 2px 0.8rem !important; }
+            #symbol-display { width: 2.25rem !important; height: 2.25rem !important; font-size: 1.5rem !important; }
+            
+            /* 제어 버튼 크기 조절 */
+            #number-buttons-row button { width: 2.25rem !important; height: 2.25rem !important; font-size: 1.2rem !important; }
+            #container-compare-pad button { padding: 0.35rem 1.5rem !important; font-size: 1.5rem !important; }
+            #container-number-pad p, #container-compare-pad p { font-size: 0.9rem !important; margin-bottom: 2px !important; }
+            
+            /* 자유 놀이터 모드 조절 */
+            #view-sandbox p { font-size: 0.9rem !important; margin-bottom: 2px !important; }
+            #view-sandbox .grid { min-height: 160px !important; }
+            #sandbox-svg-a, #sandbox-svg-b { width: 90px !important; height: 90px !important; }
+            #view-sandbox .glowing-box-rose, #view-sandbox .glowing-box-sky { font-size: 1.3rem !important; padding: 2px 0.8rem !important; }
+            #sandbox-symbol { width: 2.25rem !important; height: 2.25rem !important; font-size: 1.5rem !important; }
+            #learning-note { font-size: 0.9rem !important; padding: 0.4rem !important; margin-top: 0.4rem !important; }
         }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex flex-col items-center justify-between p-2 md:p-4 selection:bg-yellow-200">
+<body class="min-h-screen w-screen overflow-y-auto flex flex-col items-center justify-start p-3 pb-12 selection:bg-yellow-200">
 
-    <!-- 상단 헤더 (높이 최소화로 스크롤 방지) -->
-    <header class="w-full max-w-xl text-center my-0.5 flex-shrink-0">
-        <h1 class="text-3xl md:text-4xl font-bold text-amber-600 drop-shadow-sm flex items-center justify-center gap-1">
+    <!-- 상단 헤더 -->
+    <header class="w-full max-w-xl text-center my-2 flex-shrink-0">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-amber-600 drop-shadow-sm flex items-center justify-center gap-1">
             🍕 단위분수 마스터 탐험대 🍫
         </h1>
     </header>
 
-    <!-- 메인 플레이보드 박스 -->
-    <main class="w-full max-w-xl bg-white rounded-2xl shadow-lg border-4 border-amber-300 p-3 md:p-4 flex-1 flex flex-col justify-between overflow-hidden my-1">
+    <!-- 메인 플레이보드 박스 (스크롤이 필요할 땐 자유롭게 아래로 늘어나도록 설정) -->
+    <main class="w-full max-w-xl bg-white rounded-2xl shadow-md border-4 border-amber-300 p-3 sm:p-5 flex-grow flex flex-col justify-between my-2">
         
         <!-- 모드 제어 버튼 탭 -->
-        <div class="flex justify-center gap-2 mb-1.5 flex-shrink-0">
-            <button id="btn-tab-game" onclick="switchTab('game')" class="px-4 py-1 rounded-full text-lg md:text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-400 text-white border-2 border-amber-500">
+        <div class="flex justify-center gap-3 mb-2 flex-shrink-0">
+            <button id="btn-tab-game" onclick="switchTab('game')" class="px-5 py-1 rounded-full text-lg sm:text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-400 text-white border-2 border-amber-500">
                 🎯 단계별 게임
             </button>
-            <button id="btn-tab-sandbox" onclick="switchTab('sandbox')" class="px-4 py-1 rounded-full text-lg md:text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-100 text-amber-800 border-2 border-amber-200">
+            <button id="btn-tab-sandbox" onclick="switchTab('sandbox')" class="px-5 py-1 rounded-full text-lg sm:text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-100 text-amber-800 border-2 border-amber-200">
                 🔍 자유 놀이터
             </button>
         </div>
 
-        <!-- 시각화 도형 형태 (피자 vs 초콜릿) -->
-        <div class="flex justify-center items-center gap-2 mb-1.5 bg-amber-50 p-1 rounded-xl border border-amber-200 w-fit mx-auto text-sm md:text-base flex-shrink-0">
+        <!-- 시각화 도형 형태 -->
+        <div class="flex justify-center items-center gap-1.5 mb-2 bg-amber-50 p-1.5 rounded-xl border border-amber-200 w-fit mx-auto text-sm sm:text-base flex-shrink-0">
             <span class="font-bold text-amber-900">그림 모양:</span>
-            <button onclick="setViewType('circle')" id="btn-view-circle" class="px-3 py-0.5 rounded-lg font-bold border-2 border-amber-400 bg-amber-400 text-white transition-all">
+            <button onclick="setViewType('circle')" id="btn-view-circle" class="px-3 py-0.5 rounded-lg font-bold border border-amber-400 bg-amber-400 text-white transition-all">
                 🍕 피자
             </button>
-            <button onclick="setViewType('bar')" id="btn-view-bar" class="px-3 py-0.5 rounded-lg font-bold border-2 border-amber-200 bg-white text-amber-700 transition-all">
+            <button onclick="setViewType('bar')" id="btn-view-bar" class="px-3 py-0.5 rounded-lg font-bold border border-amber-200 bg-white text-amber-700 transition-all">
                 🍫 초콜릿
             </button>
         </div>
 
         <!-- ================= [1. 단계별 도전 게임 화면] ================= -->
-        <div id="view-game" class="flex-1 flex flex-col justify-between overflow-hidden">
+        <div id="view-game" class="flex-grow flex flex-col justify-between">
             
             <!-- 현재 진행 상태줄 -->
-            <div class="flex justify-between items-center bg-amber-50 px-3 py-1 rounded-xl border border-amber-200 mb-1 text-base md:text-lg font-bold flex-shrink-0">
-                <div class="text-amber-800 flex items-center gap-1">
-                    <span class="bg-amber-500 text-white px-2 py-0.5 rounded-lg text-sm" id="stage-badge">1단계</span>
+            <div class="flex justify-between items-center bg-amber-50 px-3 py-1 rounded-xl border border-amber-200 mb-2 text-base sm:text-lg font-bold flex-shrink-0">
+                <div class="text-amber-800 flex items-center gap-1.5">
+                    <span class="bg-amber-500 text-white px-2.5 py-0.5 rounded-lg text-xs sm:text-sm" id="stage-badge">1단계</span>
                     <span id="stage-title" class="text-amber-950">분모 찾기</span>
                 </div>
                 <div class="text-amber-900">
@@ -97,188 +113,210 @@
                 </div>
             </div>
 
-            <!-- 실시간 행동 유도 가이드라인 -->
-            <div id="game-guide-text" class="text-center text-sm md:text-base font-bold text-amber-950 mb-1 bg-yellow-50 py-1 rounded-lg border border-yellow-100 flex-shrink-0">
+            <!-- 가이드라인 -->
+            <div id="game-guide-text" class="text-center text-sm sm:text-base font-bold text-amber-950 mb-2 bg-yellow-50 py-1 rounded-lg border border-yellow-100 flex-shrink-0">
                 그림을 세어보고 알맞은 분모를 아래에서 골라보세요!
             </div>
 
-            <!-- 중앙 시각 카드 배치 영역 (높이 자동 조율) -->
-            <div class="flex-1 flex items-center justify-center overflow-hidden my-1">
+            <!-- 중앙 시각 카드 배치 영역 -->
+            <div class="flex-grow flex items-center justify-center my-2">
                 
                 <!-- [1단계용 단일 카드 구조] -->
-                <div id="layout-single-card" class="w-full max-w-[180px] md:max-w-[200px] bg-rose-50 border-2 border-rose-200 rounded-2xl p-2 flex flex-col items-center justify-center shadow-inner h-full max-h-[180px] md:max-h-[220px]">
-                    <div id="single-svg-container" class="w-20 h-20 md:w-24 md:h-24 flex items-center justify-center"></div>
-                    <div class="mt-1 flex flex-col items-center justify-center text-xl md:text-2xl font-bold text-rose-600 bg-white px-4 py-0.5 rounded-xl shadow-sm border-2 glowing-box-rose" id="single-fraction-box">
-                        <div>1</div>
+                <div id="layout-single-card" class="w-full max-w-[340px] bg-rose-50 border-2 border-rose-300 rounded-3xl p-4 flex flex-col items-center justify-center shadow-md transition-all">
+                    <div id="single-svg-container" class="w-[160px] h-[160px] sm:w-[200px] sm:h-[200px] flex items-center justify-center"></div>
+                    <div class="mt-3 flex flex-col items-center justify-center text-3xl sm:text-4xl font-bold text-rose-600 bg-white px-8 py-1 rounded-xl shadow-sm border-2 glowing-box-rose" id="single-fraction-box">
+                        <div class="leading-none">1</div>
                         <div class="fraction-line"></div>
-                        <div id="single-denom-text">?</div>
+                        <div id="single-denom-text" class="leading-none">?</div>
                     </div>
                 </div>
 
                 <!-- [2, 3단계용 더블 카드 구조] -->
-                <div id="layout-double-card" class="hidden w-full grid grid-cols-11 gap-1 items-center justify-center h-full max-h-[180px] md:max-h-[220px]">
-                    <!-- 왼쪽 분수 (A) -->
-                    <div id="card-double-a" class="col-span-5 bg-rose-50 border-2 border-rose-200 rounded-2xl p-2 flex flex-col items-center justify-center shadow-inner h-full">
-                        <div id="double-svg-a" class="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center"></div>
-                        <div id="double-fraction-a" class="mt-1 flex flex-col items-center justify-center text-lg md:text-xl font-bold text-rose-600 bg-white px-3 py-0.5 rounded-xl shadow-sm border-2 border-rose-200">
-                            <div>1</div>
+                <div id="layout-double-card" class="hidden w-full grid grid-cols-11 gap-2 items-center justify-center">
+                    <!-- 왼쪽 분수 카드 -->
+                    <div id="card-left" class="col-span-5 bg-rose-50 border-2 border-rose-200 rounded-xl p-2.5 flex flex-col items-center justify-center shadow-inner transition-all">
+                        <div id="svg-container-a" class="w-[110px] h-[110px] sm:w-[150px] sm:h-[150px] flex items-center justify-center"></div>
+                        <div class="mt-2 flex flex-col items-center justify-center text-2xl sm:text-3xl font-bold text-rose-600 bg-white px-5 py-1 rounded-lg shadow-sm border glowing-box-rose">
+                            <div class="leading-none">1</div>
                             <div class="fraction-line"></div>
-                            <div id="double-denom-a">?</div>
+                            <div id="denom-text-a" class="leading-none">?</div>
                         </div>
                     </div>
 
-                    <!-- 중앙 기호 상태 표시판 -->
-                    <div class="col-span-1 flex justify-center">
-                        <div id="double-symbol" class="text-xl md:text-2xl font-extrabold text-amber-600 bg-amber-100 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl border-2 border-amber-300">
+                    <!-- 중앙 부등호 -->
+                    <div class="col-span-1 flex justify-center items-center">
+                        <div id="symbol-display" class="text-3xl sm:text-4xl md:text-5xl font-black text-amber-600 bg-amber-100 w-11 h-11 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl border-2 border-amber-300">
                             ?
                         </div>
                     </div>
 
-                    <!-- 오른쪽 분수 (B) -->
-                    <div id="card-double-b" class="col-span-5 bg-sky-50 border-2 border-sky-200 rounded-2xl p-2 flex flex-col items-center justify-center shadow-inner h-full">
-                        <div id="double-svg-b" class="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center"></div>
-                        <div id="double-fraction-b" class="mt-1 flex flex-col items-center justify-center text-lg md:text-xl font-bold text-sky-600 bg-white px-3 py-0.5 rounded-xl shadow-sm border-2 border-sky-200">
-                            <div>1</div>
+                    <!-- 오른쪽 분수 카드 -->
+                    <div id="card-right" class="col-span-5 bg-sky-50 border-2 border-sky-200 rounded-xl p-2.5 flex flex-col items-center justify-center shadow-inner transition-all opacity-40">
+                        <div id="svg-container-b" class="w-[110px] h-[110px] sm:w-[150px] sm:h-[150px] flex items-center justify-center"></div>
+                        <div class="mt-2 flex flex-col items-center justify-center text-2xl sm:text-3xl font-bold text-sky-600 bg-white px-5 py-1 rounded-lg shadow-sm border glowing-box-sky">
+                            <div class="leading-none">1</div>
                             <div class="fraction-line"></div>
-                            <div id="double-denom-b">?</div>
+                            <div id="denom-text-b" class="leading-none">?</div>
                         </div>
                     </div>
                 </div>
 
             </div>
 
-            <!-- 하단 인터랙션 도구 조작 패널 -->
-            <div class="mt-1 bg-yellow-50/50 p-2 rounded-xl border border-amber-100 flex-shrink-0">
+            <!-- [하단 입력 패널 - 숫자 선택 영역 & 부등호 선택 영역] -->
+            <div class="mt-2 mb-1 bg-amber-50/50 p-1.5 rounded-2xl border border-amber-100 flex-shrink-0">
                 
-                <!-- 1. 숫자 선택 가로 패널 (1단계 및 3단계 전용) -->
-                <div id="panel-number-choice" class="flex flex-col items-center">
-                    <p class="text-xs md:text-sm font-bold text-amber-900 mb-1" id="number-panel-title">알맞은 조각 수를 고르세요!</p>
-                    <div id="number-buttons-grid" class="flex flex-row flex-nowrap justify-center gap-1.5 max-w-full overflow-x-auto no-scrollbar pb-1">
-                        <!-- JS로 버튼들이 한 줄로 동적 채워집니다 -->
+                <!-- 1. 숫자 선택용 키패드 (2줄 고정 격자 구조) -->
+                <div id="container-number-pad" class="w-full flex flex-col items-center">
+                    <p class="text-center text-base sm:text-lg font-bold text-amber-900 mb-1.5" id="number-pad-label">알맞은 분모 숫자를 골라주세요:</p>
+                    <div id="number-buttons-row" class="flex flex-col gap-2 w-full items-center max-w-[320px] sm:max-w-[480px] py-1 px-1">
+                        <!-- JS에서 동적으로 구조화된 단추들이 주입됩니다. -->
                     </div>
                 </div>
 
-                <!-- 2. 크기 비교 부등호 패널 (2단계 및 3단계 최종 단계용) -->
-                <div id="panel-compare-choice" class="hidden flex flex-col items-center">
-                    <p class="text-xs md:text-sm font-bold text-amber-900 mb-1">어느 쪽 단위분수가 더 클까요?</p>
-                    <div class="flex justify-center gap-4">
-                        <button onclick="checkCompareAnswer('gt')" class="px-8 py-1 bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 text-white rounded-xl text-2xl font-bold shadow-md transform transition-all active:scale-95 border-b-4 border-green-700">
+                <!-- 2. 부등호 선택용 패널 -->
+                <div id="container-compare-pad" class="hidden w-full">
+                    <p class="text-center text-base sm:text-lg font-bold text-amber-900 mb-2">두 분수의 크기를 비교해보세요:</p>
+                    <div class="flex justify-center gap-8 py-1.5">
+                        <button onclick="submitComparison('gt')" class="px-10 py-2 bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 text-white rounded-xl text-3xl font-bold shadow-md transform transition-all active:scale-90 border-b-4 border-green-700">
                             &gt;
                         </button>
-                        <button onclick="checkCompareAnswer('lt')" class="px-8 py-1 bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 text-white rounded-xl text-2xl font-bold shadow-md transform transition-all active:scale-95 border-b-4 border-green-700">
+                        <button onclick="submitComparison('lt')" class="px-10 py-2 bg-gradient-to-r from-emerald-400 to-green-500 hover:from-emerald-500 hover:to-green-600 text-white rounded-xl text-3xl font-bold shadow-md transform transition-all active:scale-90 border-b-4 border-green-700">
                             &lt;
                         </button>
                     </div>
                 </div>
+
             </div>
 
         </div>
 
-        <!-- ================= [2. 자유 놀이터 화면] ================= -->
-        <div id="view-sandbox" class="hidden flex-1 flex flex-col justify-between overflow-hidden">
-            <p class="text-center text-sm md:text-base text-amber-900 font-bold mb-1 flex-shrink-0">
-                💡 조절기 조절을 통해 분모가 바뀔 때 한 조각 크기를 비교해 보세요!
+        <!-- ================= [2. 자유 놀이터 (샌드박스) 화면] ================= -->
+        <div id="view-sandbox" class="hidden flex-grow flex flex-col justify-between">
+            <p class="text-center text-base sm:text-lg text-amber-900 font-bold mb-2 flex-shrink-0">
+                💡 분모 조절기를 움직여서 두 단위분수의 크기를 직접 비교해보세요!
             </p>
 
-            <div class="grid grid-cols-11 gap-1 items-center justify-center flex-1 my-1 overflow-hidden">
-                <!-- 왼쪽 분수 (핑크) -->
-                <div class="col-span-5 bg-rose-50 border-2 border-rose-200 rounded-2xl p-2 h-full flex flex-col items-center justify-center shadow-md">
-                    <div id="sandbox-svg-a" class="w-14 h-14 md:w-20 md:h-20 flex items-center justify-center"></div>
-                    <div class="mt-1 flex flex-col items-center justify-center text-lg md:text-xl font-bold text-rose-600 bg-white px-3 py-0.5 rounded-lg shadow-sm border border-rose-100">
-                        <div>1</div>
+            <!-- 분수 조절 시각 카드 -->
+            <div class="flex-grow grid grid-cols-11 gap-2 items-center justify-center my-2">
+                <!-- 왼쪽 카드 -->
+                <div class="col-span-5 bg-rose-50 border-2 border-rose-200 rounded-xl p-2.5 flex flex-col items-center justify-center h-full shadow-md">
+                    <div id="sandbox-svg-a" class="w-[100px] h-[100px] sm:w-[140px] sm:h-[140px] flex items-center justify-center"></div>
+                    <div class="mt-2 flex flex-col items-center justify-center text-xl sm:text-2xl font-bold text-rose-600 bg-white px-4 py-1 rounded-lg border glowing-box-rose">
+                        <div class="leading-none">1</div>
                         <div class="fraction-line"></div>
-                        <div id="sandbox-denom-text-a">2</div>
+                        <div id="sandbox-denom-text-a" class="leading-none">2</div>
                     </div>
                     <!-- 분모 조절 슬라이더 -->
-                    <div class="w-full mt-1.5 flex-shrink-0">
-                        <label class="block text-center text-xs text-rose-800 font-bold">분모: <span id="slider-val-a" class="text-sm">2</span></label>
-                        <input type="range" id="slider-a" min="2" max="9" value="2" oninput="onSandboxChange()" class="w-full h-1.5 bg-rose-200 rounded-lg appearance-none cursor-pointer accent-rose-500">
+                    <div class="w-full mt-3">
+                        <input type="range" id="slider-a" min="2" max="12" value="2" oninput="onSandboxChange()" class="w-full h-2 bg-rose-200 rounded-lg appearance-none cursor-pointer accent-rose-500">
+                        <div class="flex justify-between text-[11px] text-rose-500 font-sans mt-1 font-bold">
+                            <span>2</span><span>4</span><span>6</span><span>8</span><span>10</span><span>12</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 부등호 표시 (가운데) -->
+                <!-- 부등호 (가운데) -->
                 <div class="col-span-1 flex justify-center">
-                    <div id="sandbox-symbol" class="text-2xl md:text-3xl font-extrabold text-amber-600 bg-amber-100 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl border-2 border-amber-300">
+                    <div id="sandbox-symbol" class="text-3xl sm:text-4xl font-extrabold text-amber-600 bg-amber-100 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl border border-amber-300">
                         =
                     </div>
                 </div>
 
-                <!-- 오른쪽 분수 (하늘) -->
-                <div class="col-span-5 bg-sky-50 border-2 border-sky-200 rounded-2xl p-2 h-full flex flex-col items-center justify-center shadow-md">
-                    <div id="sandbox-svg-b" class="w-14 h-14 md:w-20 md:h-20 flex items-center justify-center"></div>
-                    <div class="mt-1 flex flex-col items-center justify-center text-lg md:text-xl font-bold text-sky-600 bg-white px-3 py-0.5 rounded-lg shadow-sm border border-sky-100">
-                        <div>1</div>
+                <!-- 오른쪽 카드 -->
+                <div class="col-span-5 bg-sky-50 border-2 border-sky-200 rounded-xl p-2.5 flex flex-col items-center justify-center h-full shadow-md">
+                    <div id="sandbox-svg-b" class="w-[100px] h-[100px] sm:w-[140px] sm:h-[140px] flex items-center justify-center"></div>
+                    <div class="mt-2 flex flex-col items-center justify-center text-xl sm:text-2xl font-bold text-sky-600 bg-white px-4 py-1 rounded-lg border glowing-box-sky">
+                        <div class="leading-none">1</div>
                         <div class="fraction-line"></div>
-                        <div id="sandbox-denom-text-b">4</div>
+                        <div id="sandbox-denom-text-b" class="leading-none">4</div>
                     </div>
                     <!-- 분모 조절 슬라이더 -->
-                    <div class="w-full mt-1.5 flex-shrink-0">
-                        <label class="block text-center text-xs text-sky-800 font-bold">분모: <span id="slider-val-b" class="text-sm">4</span></label>
-                        <input type="range" id="slider-b" min="2" max="9" value="4" oninput="onSandboxChange()" class="w-full h-1.5 bg-sky-200 rounded-lg appearance-none cursor-pointer accent-sky-500">
+                    <div class="w-full mt-3">
+                        <input type="range" id="slider-b" min="2" max="12" value="4" oninput="onSandboxChange()" class="w-full h-2 bg-sky-200 rounded-lg appearance-none cursor-pointer accent-sky-500">
+                        <div class="flex justify-between text-[11px] text-sky-500 font-sans mt-1 font-bold">
+                            <span>2</span><span>4</span><span>6</span><span>8</span><span>10</span><span>12</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 학습 정리 요약 문구 -->
-            <div id="learning-note" class="bg-amber-50 p-1.5 rounded-xl border border-amber-200 text-center text-xs md:text-sm text-amber-950 font-bold leading-normal shadow-sm flex-shrink-0">
-                💡 분모 숫자가 <span class="text-rose-500 font-extrabold">더 작을수록</span> 전체를 조금만 나누기 때문에 <span class="text-sky-600 font-extrabold">한 조각의 크기가 더 큽니다!</span>
+            <!-- 학습 정리 요약 가이드 -->
+            <div id="learning-note" class="bg-amber-50 p-2 sm:p-3 rounded-xl border border-amber-200 text-center text-base sm:text-lg text-amber-950 font-bold leading-normal shadow-sm flex-shrink-0 mt-2">
+                💡 분모가 작을수록 한 조각의 크기가 더 큽니다!
             </div>
         </div>
 
     </main>
 
-    <!-- ================= [팝업 모달 영역] ================= -->
-    <!-- 모달: 정오답 알림 피드백 창 -->
-    <div id="feedback-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-4 text-center border-4 border-amber-300 shadow-2xl">
-            <div id="feedback-icon" class="text-5xl mb-1">🎉</div>
-            <h2 id="feedback-title" class="text-2xl font-bold text-amber-800 mb-1">참 잘했어요!</h2>
-            <p id="feedback-message" class="text-base text-gray-700 leading-normal mb-3">설명이 들어갑니다.</p>
-            <button onclick="closeModal()" class="w-full py-1.5 bg-amber-400 hover:bg-amber-500 text-white rounded-xl text-lg font-bold shadow-md transition-all active:scale-95 border-b-4 border-amber-600">
+    <!-- 모달: 피드백 알림창 -->
+    <div id="feedback-modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-3 z-50">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 text-center border-4 border-amber-300 shadow-xl transform scale-95 transition-transform duration-300">
+            <div id="feedback-icon" class="text-5xl sm:text-6xl mb-2">🎉</div>
+            <h2 id="feedback-title" class="text-3xl font-extrabold text-amber-800 mb-1">참 잘했어요!</h2>
+            <p id="feedback-message" class="text-lg sm:text-xl text-gray-700 leading-normal mb-4">학습 피드백 내용</p>
+            <button id="btn-feedback-close" onclick="closeModal()" class="w-full py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-xl text-xl sm:text-2xl font-bold shadow-md transition-all active:scale-95 border-b-4 border-amber-600">
                 다음으로 넘어가기 ➔
             </button>
         </div>
     </div>
 
-    <!-- 모달: 단계 클리어 축하 창 -->
-    <div id="stage-clear-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-4 text-center border-4 border-emerald-400 shadow-2xl">
-            <div class="text-5xl mb-2">🏅</div>
-            <h2 id="clear-modal-title" class="text-2xl font-bold text-emerald-700 mb-1">1단계 성공!</h2>
-            <p id="clear-modal-message" class="text-base text-gray-700 mb-3 leading-normal">
-                대단해요! 이제 다음 난이도로 나아가 볼까요?
+    <!-- 모달: 게임 최종 완료창 -->
+    <div id="gameover-modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-3 z-50">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 text-center border-4 border-amber-400 shadow-xl">
+            <div class="text-5xl sm:text-6xl mb-2">🏆</div>
+            <h2 class="text-3xl font-extrabold text-amber-800 mb-1">대단해요! 탐험 완료!</h2>
+            <p id="gameover-message" class="text-lg sm:text-xl text-gray-700 mb-4 leading-normal">
+                모든 단계를 완수했습니다!
             </p>
-            <button onclick="proceedToNextStage()" class="w-full py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-lg font-bold shadow-md transition-all active:scale-95 border-b-4 border-emerald-700">
-                다음 단계 시작! ➔
+            <button onclick="restartGame()" class="w-full py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xl sm:text-2xl font-bold shadow-md transition-all active:scale-95 border-b-4 border-emerald-700">
+                다시 처음부터 하기 🔄
             </button>
         </div>
     </div>
 
-    <!-- 모달: 게임 최종 마스터 완료 창 -->
-    <div id="gameover-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-4 text-center border-4 border-amber-400 shadow-2xl">
-            <div class="text-5xl mb-2">🏆</div>
-            <h2 class="text-2xl font-bold text-amber-800 mb-1">최종 마스터 달성!</h2>
-            <p id="gameover-message" class="text-base text-gray-700 mb-3 leading-normal">
-                모든 단계를 완료했습니다!<br>당신은 이제 훌륭한 단위분수 박사님입니다.
-            </p>
-            <button onclick="restartGame()" class="w-full py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-lg font-bold shadow-md transition-all active:scale-95 border-b-4 border-emerald-700">
-                처음부터 다시 도전 🔄
-            </button>
-        </div>
-    </div>
-
-    <!-- 하단 라이센스 바 -->
-    <footer class="text-center text-amber-700 text-xs my-0.5 flex-shrink-0">
-        © 초등학교 3학년 수학 - 단위분수 가상 교구 & 퀴즈 놀이판
+    <!-- 하단 푸터 -->
+    <footer class="text-center text-amber-700 text-xs sm:text-sm my-2 flex-shrink-0">
+        🍕 단위분수 마스터 탐험대 🍫
     </footer>
 
+    <!-- Sound Generator Engine (Single AudioContext Lifecycle) -->
     <script>
-        // 간단한 신시사이저 소리 재생기
+        // 오디오 컨텍스트 싱글톤 관리로 브라우저 제한 해제
+        let globalAudioCtx = null;
+
+        function getAudioContext() {
+            if (!globalAudioCtx) {
+                globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            // 브라우저 자동재생 보안 정책 대응용 활성화 호출
+            if (globalAudioCtx.state === 'suspended') {
+                globalAudioCtx.resume();
+            }
+            return globalAudioCtx;
+        }
+
+        // 오디오 초기 활성화 바인딩 (터치 또는 클릭 한 번에 바로 해제)
+        function initAudioOnFirstUserInteraction() {
+            try {
+                getAudioContext();
+            } catch (e) {
+                console.warn('Audio Init Fail:', e);
+            }
+        }
+        window.addEventListener('click', initAudioOnFirstUserInteraction);
+        window.addEventListener('touchstart', initAudioOnFirstUserInteraction);
+        window.addEventListener('mousedown', initAudioOnFirstUserInteraction);
+
         function playSound(type) {
             try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const ctx = getAudioContext();
                 if (!ctx) return;
+
+                // 재생 직전 확실한 오디오 컨텍스트 재생 활성화 강제화
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
                 
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
@@ -288,86 +326,66 @@
                 if (type === 'correct') {
                     const now = ctx.currentTime;
                     osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(523.25, now); // C5
-                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
-                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.frequency.setValueAtTime(523.25, now); 
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); 
+                    osc.frequency.setValueAtTime(783.99, now + 0.16); 
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
                     osc.start(now);
-                    osc.stop(now + 0.35);
+                    osc.stop(now + 0.3);
                 } else if (type === 'wrong') {
                     const now = ctx.currentTime;
                     osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(170, now);
-                    osc.frequency.linearRampToValueAtTime(120, now + 0.2);
-                    gain.gain.setValueAtTime(0.1, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.frequency.setValueAtTime(160, now);
+                    osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
                     osc.start(now);
-                    osc.stop(now + 0.2);
-                } else if (type === 'stageclear') {
+                    osc.stop(now + 0.25);
+                } else if (type === 'finish') {
                     const now = ctx.currentTime;
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(523.25, now); // C5
-                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
-                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
-                    osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    osc.frequency.setValueAtTime(523.25, now); 
+                    osc.frequency.setValueAtTime(659.25, now + 0.12); 
+                    osc.frequency.setValueAtTime(783.99, now + 0.24); 
+                    osc.frequency.setValueAtTime(1046.50, now + 0.36); 
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
                     osc.start(now);
-                    osc.stop(now + 0.5);
+                    osc.stop(now + 0.6);
                 }
             } catch (e) {
-                console.log('Audio Context ignored or not enabled yet');
+                console.warn('Audio feedback failed:', e);
             }
         }
     </script>
 
+    <!-- Core Application Logic -->
     <script>
-        // 전역 플레이 환경 제어 변수
-        let currentTab = 'game'; 
-        let viewType = 'circle'; 
-
-        // 단계별 게임 상태 데이터
-        let currentStage = 1; // 1: 분모 찾기, 2: 단순 비교, 3: 마스터 도전
-        let currentRound = 1; // 각 단계별로 1 ~ 5라운드까지
-        let gameScore = 0;
-
-        // 부정 난사 방지 및 단계 추적 제어 변수
-        let isProcessing = false;       // 중복 연타 및 스킵 방지 상태 잠금 플래그
-        let lastAnswerWasCorrect = false; // 현재 풀이 시점의 정오답 결과 기록
-
-        // 동적 연산용 분모 및 정답 정수형 기록
-        let targetDenomA = 2;
-        let targetDenomB = 3;
+        // 전역 상태 관리
+        let currentTab = 'game';
+        let viewType = 'circle';
         
-        // 3단계용 마크업 스텝 제어
-        // 0: 왼쪽 분모 대기, 1: 오른쪽 분모 대기, 2: 부등호 결정 대기
-        let stage3Step = 0; 
-        let userSelectDenomA = "?";
-        let userSelectDenomB = "?";
+        let currentRound = 1; // 총 1~15라운드 (1단계: 1~5, 2단계: 6~10, 3단계: 11~15)
+        let score = 0;
+        let isProcessing = false; // 연타 방지 플래그
+        let lastAnswerWasCorrect = false;
 
-        // 최초 윈도우 부팅 완료 후 런타임 제어 시작
+        // 문제 상태 변수들
+        let denomA = 2;
+        let denomB = 3;
+        
+        // 3단계용 서브 단계 진행 상태
+        // 'left' -> 'right' -> 'compare'
+        let stage3Step = 'left'; 
+
         window.onload = function() {
-            initNumberChoiceLayout();
+            renderNumberButtons();
             restartGame();
             onSandboxChange();
         };
 
-        // 가로 스크롤형 숫자 버튼 판 동적 구성
-        function initNumberChoiceLayout() {
-            const grid = document.getElementById('number-buttons-grid');
-            grid.innerHTML = '';
-            // 2부터 9까지의 초3 추천 범주로 동적 루핑 구성
-            for (let i = 2; i <= 9; i++) {
-                const btn = document.createElement('button');
-                btn.className = "w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 bg-white hover:bg-amber-100 border-2 border-amber-300 text-amber-800 text-lg sm:text-xl font-bold rounded-xl flex items-center justify-center flex-shrink-0 transition-all shadow-sm active:scale-90 active:bg-amber-200";
-                btn.innerText = i;
-                btn.onclick = () => onSelectNumber(i);
-                grid.appendChild(btn);
-            }
-        }
-
-        // 탭 대안 연산기
+        // 탭 제어
         function switchTab(tab) {
             currentTab = tab;
             const btnGame = document.getElementById('btn-tab-game');
@@ -375,504 +393,480 @@
             const viewGame = document.getElementById('view-game');
             const viewSandbox = document.getElementById('view-sandbox');
 
-            isProcessing = false; // 탭 전환 시 잠금 원천 해제
-
             if (tab === 'game') {
-                btnGame.className = "px-4 py-1 rounded-full text-lg md:text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-400 text-white border-2 border-amber-500";
-                btnSandbox.className = "px-4 py-1 rounded-full text-lg md:text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-100 text-amber-800 border-2 border-amber-200";
+                btnGame.className = "px-5 py-1 rounded-full text-lg sm:text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-400 text-white border-2 border-amber-500";
+                btnSandbox.className = "px-5 py-1 rounded-full text-lg sm:text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-100 text-amber-800 border-2 border-amber-200";
                 viewGame.classList.remove('hidden');
                 viewSandbox.classList.add('hidden');
                 setupQuestion();
             } else {
-                btnGame.className = "px-4 py-1 rounded-full text-lg md:text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-100 text-amber-800 border-2 border-amber-200";
-                btnSandbox.className = "px-4 py-1 rounded-full text-lg md:text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-400 text-white border-2 border-amber-500";
+                btnGame.className = "px-5 py-1 rounded-full text-lg sm:text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-100 text-amber-800 border-2 border-amber-200";
+                btnSandbox.className = "px-5 py-1 rounded-full text-lg sm:text-xl font-bold transition-all transform hover:scale-105 shadow-sm bg-amber-400 text-white border-2 border-amber-500";
                 viewGame.classList.add('hidden');
                 viewSandbox.classList.remove('hidden');
                 onSandboxChange();
             }
         }
 
-        // 시각 형태 조절자 (피자형 vs 초콜릿형)
+        // 시각화 형태 스위치
         function setViewType(type) {
             viewType = type;
             const btnCircle = document.getElementById('btn-view-circle');
             const btnBar = document.getElementById('btn-view-bar');
 
             if (type === 'circle') {
-                btnCircle.className = "px-3 py-0.5 rounded-lg font-bold border-2 border-amber-400 bg-amber-400 text-white transition-all";
-                btnBar.className = "px-3 py-0.5 rounded-lg font-bold border-2 border-amber-200 bg-white text-amber-700 transition-all";
+                btnCircle.className = "px-3 py-0.5 rounded-lg font-bold border border-amber-400 bg-amber-400 text-white transition-all";
+                btnBar.className = "px-3 py-0.5 rounded-lg font-bold border border-amber-200 bg-white text-amber-700 transition-all";
             } else {
-                btnCircle.className = "px-3 py-0.5 rounded-lg font-bold border-2 border-amber-200 bg-white text-amber-700 transition-all";
-                btnBar.className = "px-3 py-0.5 rounded-lg font-bold border-2 border-amber-400 bg-amber-400 text-white transition-all";
+                btnCircle.className = "px-3 py-0.5 rounded-lg font-bold border border-amber-200 bg-white text-amber-700 transition-all";
+                btnBar.className = "px-3 py-0.5 rounded-lg font-bold border border-amber-400 bg-amber-400 text-white transition-all";
             }
 
             if (currentTab === 'game') {
-                renderGameAssets();
+                updateVisualsOnly();
             } else {
                 onSandboxChange();
             }
         }
 
-        // 실시간 등분 분할용 SVG 코드 생성 함수
-        function createFractionSVG(denominator, activeCount, color) {
-            const size = 180;
+        /**
+         * SVG 단위분수 그래픽 생성기
+         */
+        function createFractionSVG(denominator, color) {
+            const size = 200;
             const center = size / 2;
-            const radius = 70;
+            const radius = 80;
 
-            let svgContent = `<svg width="100%" height="100%" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">`;
+            let svgContent = `<svg class="w-full h-full max-h-full max-w-full" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" style="display: block; margin: auto;">`;
 
             if (viewType === 'circle') {
-                // 피자 모양 (원형)
-                // 1. 기본 배경 원 칠하기
-                svgContent += `<circle cx="${center}" cy="${center}" r="${radius}" fill="#F4F4F5" stroke="#E4E4E7" stroke-width="2.5" />`;
+                // 1. 피자 배경 서클
+                svgContent += `<circle cx="${center}" cy="${center}" r="${radius}" fill="#F3F4F6" stroke="#D1D5DB" stroke-width="3" />`;
 
+                // 2. 색칠되는 단위 부채꼴 (1조각)
                 if (denominator === 1) {
-                    svgContent += `<circle cx="${center}" cy="${center}" r="${radius}" fill="${color}" stroke="#333333" stroke-width="2.5" />`;
+                    svgContent += `<circle cx="${center}" cy="${center}" r="${radius}" fill="${color}" stroke="#374151" stroke-width="3" />`;
                 } else {
-                    // 한 조각의 각도 획득
-                    const stepAngle = 360 / denominator;
-                    const radStart = (Math.PI / 180) * (-90); // 12시 기점
-                    const radEnd = (Math.PI / 180) * (-90 + stepAngle);
+                    const angleStep = 360 / denominator;
+                    const radStart = (Math.PI / 180) * (-90);
+                    const radEnd = (Math.PI / 180) * (-90 + angleStep);
 
                     const xStart = center + radius * Math.cos(radStart);
                     const yStart = center + radius * Math.sin(radStart);
                     const xEnd = center + radius * Math.cos(radEnd);
                     const yEnd = center + radius * Math.sin(radEnd);
 
-                    const largeArc = stepAngle > 180 ? 1 : 0;
+                    const largeArc = angleStep > 180 ? 1 : 0;
 
-                    // 활성 등분 영역 색칠
-                    if (activeCount > 0) {
-                        svgContent += `
-                            <path d="M ${center} ${center} L ${xStart} ${yStart} A ${radius} ${radius} 0 ${largeArc} 1 ${xEnd} ${yEnd} Z" 
-                                  fill="${color}" stroke="#333333" stroke-width="2" />
-                        `;
-                    }
+                    svgContent += `<path d="M ${center} ${center} L ${xStart} ${yStart} A ${radius} ${radius} 0 ${largeArc} 1 ${xEnd} ${yEnd} Z" fill="${color}" stroke="#374151" stroke-width="3" />`;
                 }
 
-                // 2. 점선 형태의 나누기 분할 가이드라인 추가
+                // 3. 분할 나눔 선
                 for (let i = 0; i < denominator; i++) {
-                    const currentAngle = -90 + (360 / denominator) * i;
-                    const rad = (Math.PI / 180) * currentAngle;
-                    const destX = center + radius * Math.cos(rad);
-                    const destY = center + radius * Math.sin(rad);
-                    svgContent += `<line x1="${center}" y1="${center}" x2="${destX}" y2="${destY}" stroke="#A1A1AA" stroke-width="1.5" stroke-dasharray="2,2" />`;
+                    const angle = -90 + (360 / denominator) * i;
+                    const radLine = (Math.PI / 180) * angle;
+                    const xLine = center + radius * Math.cos(radLine);
+                    const yLine = center + radius * Math.sin(radLine);
+                    svgContent += `<line x1="${center}" y1="${center}" x2="${xLine}" y2="${yLine}" stroke="#9CA3AF" stroke-width="2.5" />`;
                 }
 
-                // 외각 바운더리 윤곽선 강화
-                svgContent += `<circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#3F3F46" stroke-width="2.5" />`;
+                // 외곽선 마무리
+                svgContent += `<circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#374151" stroke-width="3.5" />`;
 
             } else {
-                // 초콜릿 모양 (직사각형 막대)
-                const width = 140;
-                const height = 50;
-                const x = (size - width) / 2;
-                const y = (size - height) / 2;
+                // 초콜릿 막대형
+                const rectWidth = 160;
+                const rectHeight = 60;
+                const xStart = (size - rectWidth) / 2;
+                const yStart = (size - rectHeight) / 2;
 
-                // 1. 전체 백그라운드 몰드
-                svgContent += `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="6" fill="#F4F4F5" stroke="#E4E4E7" stroke-width="2.5" />`;
+                // 1. 전체 바 배경
+                svgContent += `<rect x="${xStart}" y="${yStart}" width="${rectWidth}" height="${rectHeight}" rx="8" fill="#F3F4F6" stroke="#D1D5DB" stroke-width="3" />`;
 
-                // 한 등분 가로 비율 구하기
-                const stepWidth = width / denominator;
+                // 2. 색칠되는 1조각
+                const stepWidth = rectWidth / denominator;
+                svgContent += `<rect x="${xStart}" y="${yStart}" width="${stepWidth}" height="${rectHeight}" rx="8" fill="${color}" stroke="none" />`;
+                svgContent += `<rect x="${xStart}" y="${yStart}" width="${stepWidth}" height="${rectHeight}" fill="${color}" stroke="none" />`;
 
-                // 둥근 챔퍼 클립 구체화 적용
-                svgContent += `
-                    <clipPath id="bar-clip">
-                        <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="6" />
-                    </clipPath>
-                `;
-
-                // 활성 조각 칠하기
-                if (activeCount > 0) {
-                    svgContent += `
-                        <rect x="${x}" y="${y}" width="${stepWidth}" height="${height}" fill="${color}" stroke="#333333" stroke-width="2" clip-path="url(#bar-clip)" />
-                    `;
-                }
-
-                // 분할 경계선 긋기
+                // 3. 분할 나눔 선
                 for (let i = 1; i < denominator; i++) {
-                    const dividingLineX = x + stepWidth * i;
-                    svgContent += `<line x1="${dividingLineX}" y1="${y}" x2="${dividingLineX}" y2="${y + height}" stroke="#A1A1AA" stroke-width="1.5" stroke-dasharray="2,2" />`;
+                    const lineX = xStart + stepWidth * i;
+                    svgContent += `<line x1="${lineX}" y1="${yStart}" x2="${lineX}" y2="${yStart + rectHeight}" stroke="#9CA3AF" stroke-width="2.5" />`;
                 }
 
-                // 아웃라인 재도색
-                svgContent += `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="6" fill="none" stroke="#3F3F46" stroke-width="2.5" />`;
+                // 외곽선 마무리
+                svgContent += `<rect x="${xStart}" y="${yStart}" width="${rectWidth}" height="${rectHeight}" rx="8" fill="none" stroke="#374151" stroke-width="3.5" />`;
             }
 
             svgContent += `</svg>`;
             return svgContent;
         }
 
-        // ================= [도전 스테이지 제어 엔진] =================
+        // 고정형 2줄 격자 버튼 렌더러
+        function renderNumberButtons() {
+            const container = document.getElementById('number-buttons-row');
+            container.innerHTML = '';
 
-        // 문제 초기 난이도 분배 및 리스폰
-        function setupQuestion() {
-            // 난이도 분배에 따른 분모 범위 랜덤 샘플링
-            targetDenomA = Math.floor(Math.random() * 8) + 2; // 2 ~ 9
-            do {
-                targetDenomB = Math.floor(Math.random() * 8) + 2; 
-            } while (targetDenomA === targetDenomB);
+            // 첫째 줄 컨테이너 (2, 3, 4, 5, 6, 7)
+            const row1 = document.createElement('div');
+            row1.className = "flex justify-center gap-1.5 w-full";
+            for (let i = 2; i <= 7; i++) {
+                row1.appendChild(createButton(i));
+            }
 
-            // 3단계의 진행 단계 초기화
-            stage3Step = 0;
-            userSelectDenomA = "?";
-            userSelectDenomB = "?";
+            // 둘째 줄 컨테이너 (8, 9, 10, 11, 12)
+            const row2 = document.createElement('div');
+            row2.className = "flex justify-center gap-1.5 w-full";
+            for (let i = 8; i <= 12; i++) {
+                row2.appendChild(createButton(i));
+            }
 
-            isProcessing = false; // 안전 래치 초기 해제
-            renderGameAssets();
+            container.appendChild(row1);
+            container.appendChild(row2);
         }
 
-        // 게임 상태 인터페이스 제어 뷰 페인터
-        function renderGameAssets() {
-            // 전역 스티커 바 갱신
-            document.getElementById('game-round').innerText = currentRound;
-            document.getElementById('game-score').innerText = gameScore;
+        // 개별 숫자 버튼 템플릿 생성기
+        function createButton(num) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.onclick = () => submitNumber(num);
+            btn.className = "w-10 h-10 sm:w-12 sm:h-12 bg-white hover:bg-amber-100 text-amber-700 border-2 border-amber-300 hover:border-amber-500 rounded-full text-xl sm:text-2xl font-black flex items-center justify-center transition-all transform active:scale-95 shadow-sm cursor-pointer flex-shrink-0";
+            btn.innerText = num;
+            return btn;
+        }
 
-            // 단계 텍스트 뱃지 조율
+        // ================= [도전 게임 로직 구조] =================
+
+        function getStageByRound(round) {
+            if (round <= 5) return 1;
+            if (round <= 10) return 2;
+            return 3;
+        }
+
+        // 새 문제를 생성하거나 기존 틀린 문제 유지
+        function setupQuestion() {
+            isProcessing = false;
+            
+            const currentStage = getStageByRound(currentRound);
+
+            // 새 문제 생성 단계 (새로 맞춘 후 넘어왔거나 처음일 때)
+            if (!lastAnswerWasCorrect) {
+                denomA = Math.floor(Math.random() * 9) + 2; // 2 ~ 10
+                do {
+                    denomB = Math.floor(Math.random() * 9) + 2;
+                } while (denomA === denomB);
+
+                if (currentStage === 3) {
+                    stage3Step = 'left'; // 3단계는 무조건 왼쪽 분모 맞추기부터 작동
+                }
+            }
+
+            updateGameView();
+        }
+
+        // 게임 화면 리렌더링
+        function updateGameView() {
+            const currentStage = getStageByRound(currentRound);
+            const roundIndex = ((currentRound - 1) % 5) + 1; // 단계별 1 ~ 5 라운드 번호
+            
+            // 배지 & 타이틀 설정
             const badge = document.getElementById('stage-badge');
             const title = document.getElementById('stage-title');
+            const roundText = document.getElementById('game-round');
+            const scoreText = document.getElementById('game-score');
+
+            roundText.innerText = roundIndex;
+            scoreText.innerText = score;
+
+            if (currentStage === 1) {
+                badge.innerText = "1단계";
+                badge.className = "bg-rose-500 text-white px-2.5 py-0.5 rounded-lg text-xs sm:text-sm";
+                title.innerText = "그림 속 분모 찾기";
+            } else if (currentStage === 2) {
+                badge.innerText = "2단계";
+                badge.className = "bg-sky-500 text-white px-2.5 py-0.5 rounded-lg text-xs sm:text-sm";
+                title.innerText = "두 단위분수 비교하기";
+            } else {
+                badge.innerText = "3단계";
+                badge.className = "bg-purple-600 text-white px-2.5 py-0.5 rounded-lg text-xs sm:text-sm";
+                title.innerText = "마스터 융합 미션";
+            }
+
+            // 레이아웃 스위치
+            const cardSingle = document.getElementById('layout-single-card');
+            const cardDouble = document.getElementById('layout-double-card');
+            const padNum = document.getElementById('container-number-pad');
+            const padComp = document.getElementById('container-compare-pad');
             const guide = document.getElementById('game-guide-text');
 
-            const layoutSingle = document.getElementById('layout-single-card');
-            const layoutDouble = document.getElementById('layout-double-card');
-            const panelNumbers = document.getElementById('panel-number-choice');
-            const panelCompare = document.getElementById('panel-compare-choice');
-
-            // 카드 보더 테두리 효과 초기화
-            const sFractionBox = document.getElementById('single-fraction-box');
-            const dCardA = document.getElementById('card-double-a');
-            const dCardB = document.getElementById('card-double-b');
-
-            sFractionBox.className = "mt-1 flex flex-col items-center justify-center text-xl md:text-2xl font-bold text-rose-600 bg-white px-4 py-0.5 rounded-xl shadow-sm border-2";
-            dCardA.className = "col-span-5 bg-rose-50 border-2 border-rose-200 rounded-2xl p-2 flex flex-col items-center justify-center shadow-inner h-full";
-            dCardB.className = "col-span-5 bg-sky-50 border-2 border-sky-200 rounded-2xl p-2 flex flex-col items-center justify-center shadow-inner h-full";
-
             if (currentStage === 1) {
-                // 1단계: 단일 조각수 세어보기 맞추기
-                badge.innerText = "1단계";
-                badge.className = "bg-rose-500 text-white px-2 py-0.5 rounded-lg text-sm";
-                title.innerText = "분모 알아내기";
-                guide.innerText = "그림이 총 몇 칸(조각)으로 나누어 있는지 세어서 분모를 골라주세요!";
-
-                layoutSingle.classList.remove('hidden');
-                layoutDouble.classList.add('hidden');
+                cardSingle.classList.remove('hidden');
+                cardDouble.classList.add('hidden');
+                padNum.classList.remove('hidden');
+                padComp.classList.add('hidden');
                 
-                panelNumbers.classList.remove('hidden');
-                panelCompare.classList.add('hidden');
-                document.getElementById('number-panel-title').innerText = "알맞은 조각 수(분모)를 골라주세요!";
+                document.getElementById('number-pad-label').innerText = "피자/초콜릿이 몇 조각으로 나누어졌나요?";
+                guide.innerText = "그림을 천천히 세어보고 알맞은 분모 숫자를 아래에서 콕 골라보세요!";
 
-                // SVG 렌더링
-                document.getElementById('single-svg-container').innerHTML = createFractionSVG(targetDenomA, 1, '#FDA4AF');
+                // 1단계 단일 카드 드로잉
+                document.getElementById('single-svg-container').innerHTML = createFractionSVG(denomA, '#FFA1A1');
                 document.getElementById('single-denom-text').innerText = "?";
 
-                // 가이드 포커스 조준용 애니메이션 주입
-                sFractionBox.classList.add('glowing-box-rose');
-
             } else if (currentStage === 2) {
-                // 2단계: 완성된 수 비교하기 (부등호 입력)
-                badge.innerText = "2단계";
-                badge.className = "bg-blue-500 text-white px-2 py-0.5 rounded-lg text-sm";
-                title.innerText = "부등호 크기 비교";
-                guide.innerText = "두 분수 조각의 그림 크기를 비교하고 더 큰 쪽을 향하는 부등호를 고르세요!";
+                cardSingle.classList.add('hidden');
+                cardDouble.classList.remove('hidden');
+                padNum.classList.add('hidden');
+                padComp.classList.remove('hidden');
+                guide.innerText = "두 그림을 보고 어느 분수가 더 큰지 부등호 단추를 누르세요!";
 
-                layoutSingle.classList.add('hidden');
-                layoutDouble.classList.remove('hidden');
+                // 양쪽 카드 모두 투명도 정상 및 값 주입
+                document.getElementById('card-left').style.opacity = "1.0";
+                document.getElementById('card-right').style.opacity = "1.0";
 
-                panelNumbers.classList.add('hidden');
-                panelCompare.classList.remove('hidden');
+                document.getElementById('svg-container-a').innerHTML = createFractionSVG(denomA, '#FFA1A1');
+                document.getElementById('svg-container-b').innerHTML = createFractionSVG(denomB, '#70C2FF');
 
-                // 숫자 노출 확정
-                document.getElementById('double-denom-a').innerText = targetDenomA;
-                document.getElementById('double-denom-b').innerText = targetDenomB;
+                document.getElementById('denom-text-a').innerText = denomA;
+                document.getElementById('denom-text-b').innerText = denomB;
+                document.getElementById('symbol-display').innerText = "?";
 
-                document.getElementById('double-svg-a').innerHTML = createFractionSVG(targetDenomA, 1, '#FDA4AF');
-                document.getElementById('double-svg-b').innerHTML = createFractionSVG(targetDenomB, 1, '#38BDF8');
+            } else if (currentStage === 3) {
+                cardSingle.classList.add('hidden');
+                cardDouble.classList.remove('hidden');
 
-                document.getElementById('double-symbol').innerText = "?";
-                document.getElementById('double-symbol').className = "text-xl md:text-2xl font-extrabold text-amber-600 bg-amber-100 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl border-2 border-amber-300";
+                // 3단계 세부 스텝 제어
+                if (stage3Step === 'left') {
+                    padNum.classList.remove('hidden');
+                    padComp.classList.add('hidden');
+                    document.getElementById('number-pad-label').innerText = "왼쪽 분수(분홍)의 알맞은 분모를 고르세요:";
+                    guide.innerText = "먼저 왼쪽 분홍 그림의 분모를 찾아 단추를 눌러주세요!";
 
-            } else {
-                // 3단계: 복합 마스터 (조각 세기 후 비교)
-                badge.innerText = "3단계";
-                badge.className = "bg-purple-500 text-white px-2 py-0.5 rounded-lg text-sm";
-                title.innerText = "마스터 도전";
+                    document.getElementById('card-left').style.opacity = "1.0";
+                    document.getElementById('card-right').style.opacity = "0.4"; // 오른쪽 가림
 
-                layoutSingle.classList.add('hidden');
-                layoutDouble.classList.remove('hidden');
+                    document.getElementById('svg-container-a').innerHTML = createFractionSVG(denomA, '#FFA1A1');
+                    document.getElementById('svg-container-b').innerHTML = createFractionSVG(denomB, '#70C2FF');
 
-                // SVG 설정
-                document.getElementById('double-svg-a').innerHTML = createFractionSVG(targetDenomA, 1, '#FDA4AF');
-                document.getElementById('double-svg-b').innerHTML = createFractionSVG(targetDenomB, 1, '#38BDF8');
+                    document.getElementById('denom-text-a').innerText = "?";
+                    document.getElementById('denom-text-b').innerText = "?";
+                    document.getElementById('symbol-display').innerText = "?";
 
-                if (stage3Step === 0) {
-                    guide.innerText = "먼저 왼쪽(분홍) 피자/초콜릿이 모두 몇 조각인지 세어서 골라주세요!";
-                    panelNumbers.classList.remove('hidden');
-                    panelCompare.classList.add('hidden');
-                    document.getElementById('number-panel-title').innerText = "왼쪽(분홍) 분모 결정하기";
+                } else if (stage3Step === 'right') {
+                    padNum.classList.remove('hidden');
+                    padComp.classList.add('hidden');
+                    document.getElementById('number-pad-label').innerText = "오른쪽 분수(하늘)의 알맞은 분모를 고르세요:";
+                    guide.innerText = "잘했어요! 이제 오른쪽 하늘색 그림의 분모를 아래에서 찾으세요!";
 
-                    document.getElementById('double-denom-a').innerText = "?";
-                    document.getElementById('double-denom-b').innerText = "?";
-                    document.getElementById('double-symbol').innerText = "?";
+                    document.getElementById('card-left').style.opacity = "0.4"; // 왼쪽 가림
+                    document.getElementById('card-right').style.opacity = "1.0";
 
-                    // 왼쪽 카드 펄싱 안내
-                    dCardA.classList.add('glowing-box-rose');
+                    document.getElementById('denom-text-a').innerText = denomA; // 왼쪽 완성됨
+                    document.getElementById('denom-text-b').innerText = "?";
 
-                } else if (stage3Step === 1) {
-                    guide.innerText = "이번엔 오른쪽(하늘색) 피자/초콜릿이 모두 몇 조각인지 세어볼까요?";
-                    panelNumbers.classList.remove('hidden');
-                    panelCompare.classList.add('hidden');
-                    document.getElementById('number-panel-title').innerText = "오른쪽(하늘색) 분모 결정하기";
+                } else if (stage3Step === 'compare') {
+                    padNum.classList.add('hidden');
+                    padComp.classList.remove('hidden');
+                    guide.innerText = "마지막 단계! 완성된 두 분수 중 어느 분수가 더 큰가요?";
 
-                    document.getElementById('double-denom-a').innerText = userSelectDenomA;
-                    document.getElementById('double-denom-b').innerText = "?";
-                    document.getElementById('double-symbol').innerText = "?";
+                    document.getElementById('card-left').style.opacity = "1.0";
+                    document.getElementById('card-right').style.opacity = "1.0";
 
-                    // 오른쪽 카드 펄싱 안내
-                    dCardB.classList.add('glowing-box-sky');
-
-                } else {
-                    guide.innerText = "완벽해요! 이제 어떤 단위분수의 크기가 더 큰지 고르세요!";
-                    panelNumbers.classList.add('hidden');
-                    panelCompare.classList.remove('hidden');
-
-                    document.getElementById('double-denom-a').innerText = userSelectDenomA;
-                    document.getElementById('double-denom-b').innerText = userSelectDenomB;
+                    document.getElementById('denom-text-a').innerText = denomA;
+                    document.getElementById('denom-text-b').innerText = denomB;
                 }
             }
         }
 
-        // 숫자 버튼 선택 핸들러 (1단계 & 3단계 공용)
-        function onSelectNumber(num) {
-            if (isProcessing) return; // 평가 완료 처리 중 연타 오클릭 무시
+        // 탭/도형 속성 바꿀 때 화면 내용만 살짝 새로고침
+        function updateVisualsOnly() {
+            const currentStage = getStageByRound(currentRound);
+            if (currentStage === 1) {
+                document.getElementById('single-svg-container').innerHTML = createFractionSVG(denomA, '#FFA1A1');
+            } else {
+                document.getElementById('svg-container-a').innerHTML = createFractionSVG(denomA, '#FFA1A1');
+                document.getElementById('svg-container-b').innerHTML = createFractionSVG(denomB, '#70C2FF');
+            }
+        }
 
+        // 숫자 키패드 버튼 제출 핸들러 (1단계 및 3단계)
+        function submitNumber(num) {
+            if (isProcessing) return; // 연속 클릭 잠금
+
+            const currentStage = getStageByRound(currentRound);
             if (currentStage === 1) {
                 isProcessing = true;
-                const isCorrect = (num === targetDenomA);
-                document.getElementById('single-denom-text').innerText = num;
-                triggerStepResult(isCorrect, 1, num);
+                const isCorrect = (num === denomA);
+                handleOutcome(isCorrect, 1);
             } else if (currentStage === 3) {
-                if (stage3Step === 0) {
-                    isProcessing = true;
-                    // 왼쪽 분모 검수
-                    if (num === targetDenomA) {
-                        userSelectDenomA = num;
-                        stage3Step = 1;
-                        isProcessing = false; // 곧바로 다음 단계로 갈 때는 조기 잠금 해제
-                        playSound('correct');
-                        renderGameAssets();
-                    } else {
-                        // 오답 시에도 강제로 모달을 띄워 아무거나 빨리 누르는 행위 완전 방지
-                        triggerStepResult(false, 3, "left");
-                    }
-                } else if (stage3Step === 1) {
-                    isProcessing = true;
-                    // 오른쪽 분모 검수
-                    if (num === targetDenomB) {
-                        userSelectDenomB = num;
-                        stage3Step = 2;
-                        isProcessing = false; // 크기 비교 단계로 전입 시 조기 해제
-                        playSound('correct');
-                        renderGameAssets();
-                    } else {
-                        triggerStepResult(false, 3, "right");
-                    }
+                isProcessing = true;
+                if (stage3Step === 'left') {
+                    const isCorrect = (num === denomA);
+                    handleOutcome(isCorrect, 'stage3-left');
+                } else if (stage3Step === 'right') {
+                    const isCorrect = (num === denomB);
+                    handleOutcome(isCorrect, 'stage3-right');
                 }
             }
         }
 
-        // 크기 비교 부등호 응답 연산기 (2단계 & 3단계 공용)
-        function checkCompareAnswer(choice) {
-            if (isProcessing) return; 
-            isProcessing = true; // 무한 중복 입력 방지
+        // 부등호 버튼 제출 핸들러 (2단계 및 3단계)
+        function submitComparison(choice) {
+            if (isProcessing) return;
+            isProcessing = true;
 
-            const realGreater = targetDenomA < targetDenomB ? 'gt' : 'lt';
-            const isCorrect = (choice === realGreater);
+            const currentStage = getStageByRound(currentRound);
+            const answer = (denomA < denomB) ? 'gt' : 'lt';
+            const isCorrect = (choice === answer);
 
-            const sym = document.getElementById('double-symbol');
-            sym.innerText = realGreater === 'gt' ? '>' : '<';
-
-            if (isCorrect) {
-                sym.className = "text-xl md:text-2xl font-extrabold text-green-700 bg-green-100 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl border-2 border-green-400";
-            } else {
-                sym.className = "text-xl md:text-2xl font-extrabold text-red-600 bg-red-100 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl border-2 border-red-400";
+            if (currentStage === 2) {
+                handleOutcome(isCorrect, 2);
+            } else if (currentStage === 3) {
+                handleOutcome(isCorrect, 3);
             }
-
-            triggerStepResult(isCorrect, currentStage);
         }
 
-        // 결과 판별 피드백 모달 트리거
-        function triggerStepResult(isCorrect, stageNum, extraVal = null) {
-            const fTitle = document.getElementById('feedback-title');
-            const fIcon = document.getElementById('feedback-icon');
-            const fMessage = document.getElementById('feedback-message');
-            const fBtn = document.querySelector('#feedback-modal button');
-
+        // 피드백 모달 처리 루틴
+        function handleOutcome(isCorrect, context) {
             lastAnswerWasCorrect = isCorrect;
+            const titleEl = document.getElementById('feedback-title');
+            const msgEl = document.getElementById('feedback-message');
+            const iconEl = document.getElementById('feedback-icon');
+            const btnClose = document.getElementById('btn-feedback-close');
 
             if (isCorrect) {
-                gameScore += 10;
                 playSound('correct');
-                fIcon.innerText = "🎉";
-                fTitle.innerText = "정답입니다! 참 잘했어요!";
-                fTitle.className = "text-2xl font-bold text-emerald-600 mb-1";
-                fBtn.innerText = "다음으로 넘어가기 ➔";
-                fBtn.className = "w-full py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-lg font-bold shadow-md transition-all active:scale-95 border-b-4 border-emerald-700";
+                iconEl.innerText = "🎉";
+                titleEl.innerText = "정답이에요! 대단해요!";
+                titleEl.className = "text-3xl font-extrabold text-green-600 mb-1";
+                btnClose.innerText = "다음 단계로 가기 ➔";
+                btnClose.className = "w-full py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xl font-bold shadow-md active:scale-95 border-b-4 border-green-700";
+
+                if (context === 1) {
+                    score += 20;
+                    msgEl.innerHTML = `그림의 조각을 정확히 세었네요!<br>전체 중의 1조각은 <span class="text-rose-600 font-extrabold text-2xl">1/${denomA}</span> 로 나타냅니다.`;
+                } else if (context === 2) {
+                    score += 20;
+                    const smaller = Math.min(denomA, denomB);
+                    const larger = Math.max(denomA, denomB);
+                    msgEl.innerHTML = `맞았습니다!<br>분모가 작은 <span class="text-blue-600 font-bold">1/${smaller}</span>이 분모가 큰 <span class="text-rose-600 font-bold">1/${larger}</span>보다 <span class="font-extrabold text-amber-700 bg-amber-100 px-1 rounded text-xl">더 큽니다!</span>`;
+                } else if (context === 'stage3-left') {
+                    msgEl.innerHTML = `왼쪽 분모 <span class="text-rose-600 font-extrabold text-2xl">${denomA}</span>을(를) 완벽히 맞추셨습니다!<br>이어서 오른쪽 분수도 도전하세요!`;
+                } else if (context === 'stage3-right') {
+                    msgEl.innerHTML = `오른쪽 분모 <span class="text-sky-600 font-extrabold text-2xl">${denomB}</span>도 맞췄습니다!<br>이제 마지막으로 크기를 직접 비교해보세요!`;
+                } else if (context === 3) {
+                    score += 20;
+                    const smaller = Math.min(denomA, denomB);
+                    msgEl.innerHTML = `축하합니다! 3단계를 완전 정복했습니다!<br>분모가 더 작은 <span class="text-emerald-600 font-black text-2xl">1/${smaller}</span>이(가) 정말 크네요!`;
+                }
             } else {
                 playSound('wrong');
-                fIcon.innerText = "💡";
-                fTitle.innerText = "아쉬워요! 다시 확인해봐요";
-                fTitle.className = "text-2xl font-bold text-rose-500 mb-1";
-                fBtn.innerText = "다시 도전하기 🔄";
-                fBtn.className = "w-full py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-lg font-bold shadow-md transition-all active:scale-95 border-b-4 border-rose-700";
-            }
+                iconEl.innerText = "💡";
+                titleEl.innerText = "틀려도 괜찮아요! 다시 해봐요";
+                titleEl.className = "text-3xl font-extrabold text-rose-500 mb-1";
+                btnClose.innerText = "다시 도전하기 🔄";
+                btnClose.className = "w-full py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-xl text-xl font-bold shadow-md active:scale-95 border-b-4 border-amber-600";
 
-            // 오답 원인 분석 및 맞춤 설명 제공
-            let msg = "";
-            if (stageNum === 1) {
-                if (isCorrect) {
-                    msg = `이 그림은 전체를 똑같이 <span class="text-rose-600 font-bold">${targetDenomA} 조각</span>으로 나눈 것 중 하나예요.<br>
-                           따라서 분모는 똑같이 나눈 조각 수인 <span class="bg-amber-100 px-1 rounded font-bold">1/${targetDenomA}</span>이 됩니다!`;
+                if (context === 1 || context === 'stage3-left') {
+                    msgEl.innerHTML = `그림 속 등분된 피자/초콜릿 한 칸의 수를 다시 한번 눈으로 세어볼까요?<br><span class="text-red-500 font-bold text-xl">직접 칸 수를 차근차근 세어보세요!</span>`;
+                } else if (context === 'stage3-right') {
+                    msgEl.innerHTML = `오른쪽 그림의 전체 등분된 총 칸 수를 천천히 세어보세요.<br>분모 칸 수만 찾으면 성공입니다!`;
                 } else {
-                    msg = `선택한 수 <span class="text-rose-600 font-bold">${extraVal}</span>은 전체 칸수와 일치하지 않아요.<br>
-                           피자/초콜릿이 <span class="text-blue-600 font-bold">총 몇 조각</span>으로 정밀하게 쪼개졌는지 다시 차분하게 세어볼까요?`;
-                }
-            } else if (stageNum === 2) {
-                const smaller = Math.min(targetDenomA, targetDenomB);
-                const bigger = Math.max(targetDenomA, targetDenomB);
-                if (isCorrect) {
-                    msg = `단위분수 1/${targetDenomA}과 1/${targetDenomB}을 훌륭히 비교했습니다!<br>
-                           분모 숫자인 <span class="text-rose-600 font-bold">${smaller}</span>은 <span class="text-blue-500 font-bold">${bigger}</span>보다 작으므로,<br>
-                           <span class="bg-yellow-100 p-0.5 rounded font-bold">더 적게 나눈 1/${smaller} 조각의 크기가 더 큽니다!</span>`;
-                } else {
-                    msg = `분모의 숫자가 <span class="text-rose-600 font-extrabold">더 작을수록</span> 실제 한 조각의 크기는 <span class="text-emerald-600 font-extrabold">더 큽니다!</span><br>
-                           양쪽 피자 조각의 실제 색칠된 면적을 눈으로 확인하며, 더 큼직한 쪽을 골라보세요!`;
-                }
-            } else if (stageNum === 3) {
-                if (extraVal === "left") {
-                    msg = `왼쪽(분홍색) 그림의 등분 세기가 알맞지 않아요.<br>
-                           왼쪽 조형물이 <span class="text-rose-600 font-bold">모두 몇 칸</span>으로 쪼개져 있나요? 직접 손가락으로 세어봅시다!`;
-                } else if (extraVal === "right") {
-                    msg = `오른쪽(하늘색) 그림의 등분 세기가 알맞지 않아요.<br>
-                           오른쪽 조형물이 <span class="text-sky-600 font-bold">전체 몇 등분</span>인지 꼼꼼히 관찰해보세요!`;
-                } else {
-                    // 최종 비교 오답
-                    const smaller = Math.min(targetDenomA, targetDenomB);
-                    if (isCorrect) {
-                        msg = `축하합니다! 완벽해요!<br>
-                               분모를 모두 찾아낸 뒤, 분모가 더 작은 <span class="text-emerald-600 font-bold">1/${smaller}</span>이 더 크다는 법칙까지 멋지게 증명했습니다!`;
-                    } else {
-                        msg = `양쪽 단위분수 식은 무사히 채웠지만 마지막 크기 비교가 어긋났어요.<br>
-                               눈으로 두 덩어리의 크기를 비교하며 어느 쪽이 더 알찬 조각인지 다시 생각해보세요!`;
-                    }
+                    const smaller = Math.min(denomA, denomB);
+                    const larger = Math.max(denomA, denomB);
+                    msgEl.innerHTML = `단위분수는 <span class="text-red-500 font-extrabold">조각을 적게 나눌수록(분모가 작을수록)</span> 한 조각이 훨씬 크답니다!<br><span class="text-blue-600 font-bold">1/${smaller}</span> 과 <span class="text-rose-500 font-bold">1/${larger}</span> 중 어디가 더 큰지 비교해보세요.`;
                 }
             }
 
-            fMessage.innerHTML = msg;
             document.getElementById('feedback-modal').classList.remove('hidden');
         }
 
-        // 피드백 오버레이 창 닫기 및 순환 제어
+        // 모달창 닫기 및 진행 상태 분기 처리
         function closeModal() {
             document.getElementById('feedback-modal').classList.add('hidden');
-
+            
             if (lastAnswerWasCorrect) {
-                // 정확하게 정답을 입력해야만 점수를 가산하고 다음 문제 단계로 진입
-                if (currentRound >= 5) {
-                    playSound('stageclear');
-                    const clearTitle = document.getElementById('clear-modal-title');
-                    const clearMsg = document.getElementById('clear-modal-message');
+                // 정답을 맞춘 경우
+                const currentStage = getStageByRound(currentRound);
 
-                    if (currentStage === 1) {
-                        clearTitle.innerText = "1단계 성공!";
-                        clearMsg.innerHTML = "피자와 초콜릿 조각 세기(분모 정의)를 마스터했습니다!<br>이제 두 단위분수의 크기를 비교하러 갈까요?";
-                        document.getElementById('stage-clear-modal').classList.remove('hidden');
-                    } else if (currentStage === 2) {
-                        clearTitle.innerText = "2단계 성공!";
-                        clearMsg.innerHTML = "크기 비교 부등호를 완벽하게 파악했네요!<br>마지막 융합형 '마스터 도전'에 응해봅시다!";
-                        document.getElementById('stage-clear-modal').classList.remove('hidden');
-                    } else {
-                        // 모든 3개 단계 최종 정복 완료시
-                        document.getElementById('gameover-message').innerHTML = `
-                            최종 점수: <span class="text-red-500 font-bold text-2xl">${gameScore}점</span>!<br>
-                            단위분수의 개념을 훌륭히 이수하고 정복했습니다!
-                        `;
-                        document.getElementById('gameover-modal').classList.remove('hidden');
+                if (currentStage === 3) {
+                    // 3단계 하위 단계 제어
+                    if (stage3Step === 'left') {
+                        stage3Step = 'right';
+                        isProcessing = false;
+                        updateGameView();
+                        return;
+                    } else if (stage3Step === 'right') {
+                        stage3Step = 'compare';
+                        isProcessing = false;
+                        updateGameView();
+                        return;
                     }
+                }
+
+                // 문제 완료 및 다음 라운드 전환
+                if (currentRound >= 15) {
+                    // 최종 라운드 종료
+                    playSound('finish');
+                    let comment = "단위분수 마스터 달성! 완벽히 이해하셨네요! 👍";
+                    if (score < 100) comment = "와우! 끈기있게 다 풀어냈군요! 아주 멋진 도전이었어요! 🌟";
+                    
+                    document.getElementById('gameover-message').innerHTML = `
+                        총 15문제의 탐험을 전부 통과했습니다!<br>
+                        최종 점수: <span class="text-rose-500 font-black text-3xl">${score}</span>점<br>
+                        <span class="text-amber-800 text-lg font-bold block mt-3">${comment}</span>
+                    `;
+                    document.getElementById('gameover-modal').classList.remove('hidden');
                 } else {
                     currentRound++;
+                    lastAnswerWasCorrect = false; // 플래그 리셋하여 새 문제 받기
                     setupQuestion();
                 }
             } else {
-                // 오답일 경우: 문제를 다시 만들지 않고(?)를 채워놓은 뒤 동일 상태로 유저 입력 복원
-                if (currentStage === 1) {
-                    document.getElementById('single-denom-text').innerText = "?";
-                } else if (currentStage === 2) {
-                    document.getElementById('double-symbol').innerText = "?";
-                    document.getElementById('double-symbol').className = "text-xl md:text-2xl font-extrabold text-amber-600 bg-amber-100 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl border-2 border-amber-300";
-                } else if (currentStage === 3) {
-                    if (stage3Step === 2) {
-                        // 마스터 3단계 최종 부등호 입력에서 막힌 경우 부등호 기호만 맑게 비워주기
-                        document.getElementById('double-symbol').innerText = "?";
-                        document.getElementById('double-symbol').className = "text-xl md:text-2xl font-extrabold text-amber-600 bg-amber-100 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl border-2 border-amber-300";
-                    }
-                    // 3단계의 수 맞추기 도중(Step 0, 1)의 오답은 이미 기입값이 날아가 있는 상태로 유지되므로 렌더링만 갱신
-                }
-                renderGameAssets();
+                // 틀려서 다시 풀어야 하는 경우
+                isProcessing = false;
+                updateGameView();
             }
-
-            // 모달을 온전히 확인하고 닫았을 때 비로소 상호작용 차단 해제
-            isProcessing = false;
         }
 
-        // 다음 단계(Stage)로 전입
-        function proceedToNextStage() {
-            document.getElementById('stage-clear-modal').classList.add('hidden');
-            currentStage++;
-            currentRound = 1;
-            setupQuestion();
-        }
-
-        // 처음부터 리셋 게임
+        // 전체 초기화 및 게임 재시작
         function restartGame() {
             document.getElementById('gameover-modal').classList.add('hidden');
-            currentStage = 1;
             currentRound = 1;
-            gameScore = 0;
-            isProcessing = false;
+            score = 0;
+            lastAnswerWasCorrect = false;
+            stage3Step = 'left';
             setupQuestion();
         }
 
-        // ================= [자유 탐구 놀이터 처리기] =================
+        // ================= [자유 놀이터 (샌드박스) 제어] =================
 
         function onSandboxChange() {
             const valA = parseInt(document.getElementById('slider-a').value);
             const valB = parseInt(document.getElementById('slider-b').value);
 
-            // 레이블 수치 동기화
-            document.getElementById('slider-val-a').innerText = valA;
-            document.getElementById('slider-val-b').innerText = valB;
+            // 슬라이더 옆 수치 바인딩
             document.getElementById('sandbox-denom-text-a').innerText = valA;
             document.getElementById('sandbox-denom-text-b').innerText = valB;
 
-            // 실시간 인터랙션 동등 배분 드로잉
-            document.getElementById('sandbox-svg-a').innerHTML = createFractionSVG(valA, 1, '#FFA1A1');
-            document.getElementById('sandbox-svg-b').innerHTML = createFractionSVG(valB, 1, '#70C2FF');
+            // 드로잉 반영
+            document.getElementById('sandbox-svg-a').innerHTML = createFractionSVG(valA, '#FFA1A1');
+            document.getElementById('sandbox-svg-b').innerHTML = createFractionSVG(valB, '#70C2FF');
 
             const sym = document.getElementById('sandbox-symbol');
             const note = document.getElementById('learning-note');
 
             if (valA < valB) {
                 sym.innerText = ">";
-                sym.className = "text-2xl md:text-3xl font-extrabold text-rose-500 bg-rose-50 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl border-2 border-rose-300";
-                note.innerHTML = `💡 분모 <span class="text-rose-600 font-bold">${valA}</span>이(가) 분모 <span class="text-sky-600 font-bold">${valB}</span>보다 작기 때문에,<br>더 크게 등분된 <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded font-bold">1/${valA} 조각이 훨씬 큽니다!</span>`;
+                sym.className = "text-3xl sm:text-4xl font-extrabold text-rose-500 bg-rose-100 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl border border-rose-300";
+                note.innerHTML = `💡 분모 <span class="text-rose-600 font-black">${valA}</span>이(가) 분모 <span class="text-sky-600 font-black">${valB}</span>보다 작으므로, <span class="bg-rose-100 px-1 rounded text-rose-700">1/${valA} 조각이 훨씬 더 큽니다!</span>`;
             } else if (valA > valB) {
                 sym.innerText = "<";
-                sym.className = "text-2xl md:text-3xl font-extrabold text-sky-500 bg-sky-50 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl border-2 border-sky-300";
-                note.innerHTML = `💡 분모 <span class="text-sky-600 font-bold">${valB}</span>이(가) 분모 <span class="text-rose-600 font-bold">${valA}</span>보다 작기 때문에,<br>더 크게 등분된 <span class="bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-bold">1/${valB} 조각이 훨씬 큽니다!</span>`;
+                sym.className = "text-3xl sm:text-4xl font-extrabold text-sky-500 bg-sky-100 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl border border-sky-300";
+                note.innerHTML = `💡 분모 <span class="text-sky-600 font-black">${valB}</span>이(가) 분모 <span class="text-rose-600 font-black">${valA}</span>보다 작으므로, <span class="bg-sky-100 px-1 rounded text-sky-700">1/${valB} 조각이 훨씬 더 큽니다!</span>`;
             } else {
                 sym.innerText = "=";
-                sym.className = "text-2xl md:text-3xl font-extrabold text-amber-600 bg-amber-50 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-xl border-2 border-amber-300";
-                note.innerHTML = `💡 두 분모가 <span class="text-amber-800 font-bold">${valA}</span>(으)로 같습니다!<br>나눈 조각 크기가 <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">서로 완벽하게 같습니다!</span>`;
+                sym.className = "text-3xl sm:text-4xl font-extrabold text-amber-600 bg-amber-100 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl border border-amber-300";
+                note.innerHTML = `💡 분모가 똑같이 <span class="text-amber-800 font-black">${valA}</span>이므로 나누어 가진 크기가 서로 완전히 같습니다!`;
             }
         }
     </script>
